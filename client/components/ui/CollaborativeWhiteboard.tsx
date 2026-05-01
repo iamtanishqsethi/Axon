@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useCallback, useState } from "react";
 import dynamic from "next/dynamic";
+import { useTheme } from "next-themes";
 import * as Y from "yjs";
 import { SocketIOProvider } from "y-socket.io";
 import "@excalidraw/excalidraw/index.css";
@@ -34,6 +35,8 @@ export default function CollaborativeWhiteboard({ roomId, userName }: Collaborat
   const colorRef = useRef(getRandomColor());
   const isRemoteUpdateRef = useRef(false);
   const [mounted, setMounted] = useState(false);
+  const { theme, resolvedTheme } = useTheme();
+  const currentTheme = (resolvedTheme || theme || "dark") as "dark" | "light";
 
   useEffect(() => {
     setMounted(true);
@@ -46,7 +49,7 @@ export default function CollaborativeWhiteboard({ roomId, userName }: Collaborat
     const ydoc = new Y.Doc();
     ydocRef.current = ydoc;
 
-    const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5050";
+    const serverUrl = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5050";
 
     const provider = new SocketIOProvider(serverUrl, `whiteboard-${roomId}`, ydoc, {
       autoConnect: true,
@@ -61,41 +64,62 @@ export default function CollaborativeWhiteboard({ roomId, userName }: Collaborat
 
     // Shared data structure for elements and app state
     const yElementsMap = ydoc.getMap("elementsMap");
-    const yAppState = ydoc.getMap("appState");
 
     // ── Sync remote → local ────────────────────────────────────────
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleRemoteChange = (event: any, transaction: Y.Transaction) => {
-      if (transaction.local) return;
+    const handleRemoteChange = () => {
       if (!excalidrawAPI) return;
+      
       isRemoteUpdateRef.current = true;
-
       const elementsMap = yElementsMap.toJSON();
       const elementsArray = Object.values(elementsMap);
       
-      if (elementsArray.length > 0) {
-        excalidrawAPI.updateScene({ elements: elementsArray });
-      }
-
-      isRemoteUpdateRef.current = false;
+      excalidrawAPI.updateScene({ 
+        elements: elementsArray,
+        commitToHistory: false 
+      });
+      
+      // Reset after a short delay to avoid catching our own updateScene call
+      setTimeout(() => {
+        isRemoteUpdateRef.current = false;
+      }, 50);
     };
 
     yElementsMap.observe(handleRemoteChange);
 
+    // ── Awareness → Collaborators ──────────────────────────────────
+    const handleAwarenessChange = () => {
+      const states = provider.awareness.getStates();
+      const newCollaborators = new Map();
+      
+      states.forEach((state, clientId) => {
+        if (clientId === provider.awareness.clientID) return;
+        
+        if (state.user && state.pointer) {
+          newCollaborators.set(String(clientId), {
+            pointer: state.pointer,
+            button: state.button || "up",
+            username: state.user.name,
+            color: state.user.color,
+          });
+        }
+      });
+      
+      if (excalidrawAPI) {
+        excalidrawAPI.updateScene({ collaborators: newCollaborators });
+      }
+    };
+
+    provider.awareness.on("change", handleAwarenessChange);
+
     // Load initial state if exists
-    const initialElementsMap = yElementsMap.toJSON();
-    const initialElementsArray = Object.values(initialElementsMap);
+    const initialElementsArray = Object.values(yElementsMap.toJSON());
     if (initialElementsArray.length > 0) {
       excalidrawAPI.updateScene({ elements: initialElementsArray });
     }
 
-    // Sync theme from shared state
-    yAppState.observe(() => {
-      // Could sync theme or other app state in the future
-    });
-
     return () => {
       yElementsMap.unobserve(handleRemoteChange);
+      provider.awareness.off("change", handleAwarenessChange);
       provider.destroy();
       ydoc.destroy();
     };
@@ -125,6 +149,7 @@ export default function CollaborativeWhiteboard({ roomId, userName }: Collaborat
   const handlePointerUpdate = useCallback((payload: any) => {
     if (!providerRef.current) return;
     providerRef.current.awareness.setLocalStateField("pointer", payload.pointer);
+    providerRef.current.awareness.setLocalStateField("button", payload.button);
   }, []);
 
   // ─── Stable References to Prevent Infinite Loops ─────────────────
@@ -142,10 +167,10 @@ export default function CollaborativeWhiteboard({ roomId, userName }: Collaborat
     () => ({
       appState: {
         viewBackgroundColor: "transparent",
-        theme: "dark",
+        theme: currentTheme,
       },
-    } as const),
-    []
+    }),
+    [currentTheme]
   );
 
   const handleExcalidrawAPI = useCallback(
@@ -166,12 +191,12 @@ export default function CollaborativeWhiteboard({ roomId, userName }: Collaborat
   return (
     <div className="flex flex-col w-full h-full bg-background overflow-hidden">
       {/* ── Toolbar ──────────────────────────────────────────────────── */}
-      <div className="relative z-20 flex items-center justify-between gap-2 px-3 py-2 bg-white/[0.03] border-b border-white/10 backdrop-blur-xl">
-        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/50 font-(family-name:--font-share-tech)">
+      <div className="relative z-20 flex items-center justify-between gap-2 px-3 py-2 bg-muted/20 border-b border-border/50 backdrop-blur-xl">
+        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 font-(family-name:--font-share-tech)">
           Whiteboard
         </span>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-white/30 hidden sm:inline">
+          <span className="text-[10px] text-muted-foreground/40 hidden sm:inline">
             Collaborative • {userName}
           </span>
         </div>
@@ -184,7 +209,7 @@ export default function CollaborativeWhiteboard({ roomId, userName }: Collaborat
             excalidrawAPI={handleExcalidrawAPI}
             onChange={handleChange}
             onPointerUpdate={handlePointerUpdate}
-            theme="dark"
+            theme={currentTheme}
             UIOptions={excalidrawUIOptions}
             initialData={excalidrawInitialData}
           />

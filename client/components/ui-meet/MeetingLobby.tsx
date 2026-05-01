@@ -78,25 +78,34 @@ export default function MeetingLobby({meetingId}: MeetingLobbyProps) {
 
         const startPreview = async () => {
             try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                    video: mediaPreferences.videoEnabled
-                        ? {
-                            deviceId: mediaPreferences.videoDeviceId
-                                ? {exact: mediaPreferences.videoDeviceId}
-                                : undefined,
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: mediaPreferences.videoEnabled
+                            ? {
+                                deviceId: mediaPreferences.videoDeviceId || undefined,
+                            }
+                            : false,
+                        audio: mediaPreferences.audioEnabled
+                            ? {
+                                deviceId: mediaPreferences.audioDeviceId || undefined,
+                            }
+                            : false,
+                    });
+                } catch (error) {
+                    console.warn("Lobby preview failed, trying fallback...", error);
+                    if (mediaPreferences.videoEnabled && mediaPreferences.audioEnabled) {
+                        try {
+                            stream = await navigator.mediaDevices.getUserMedia({ 
+                                audio: mediaPreferences.audioDeviceId ? { deviceId: mediaPreferences.audioDeviceId } : true 
+                            });
+                        } catch (audioError) {
+                            console.error("Lobby fallback failed:", audioError);
                         }
-                        : false,
-                    audio: mediaPreferences.audioEnabled
-                        ? {
-                            deviceId: mediaPreferences.audioDeviceId
-                                ? {exact: mediaPreferences.audioDeviceId}
-                                : undefined,
-                        }
-                        : false,
-                });
+                    }
+                }
 
                 if (cancelled) {
-                    stream.getTracks().forEach(track => track.stop());
+                    stream?.getTracks().forEach(track => track.stop());
                     return;
                 }
 
@@ -104,7 +113,7 @@ export default function MeetingLobby({meetingId}: MeetingLobbyProps) {
                     videoRef.current.srcObject = stream;
                 }
 
-                const audioTrack = stream.getAudioTracks()[0];
+                const audioTrack = stream?.getAudioTracks()[0];
                 if (audioTrack) {
                     audioContext = new AudioContext();
                     const analyser = audioContext.createAnalyser();
@@ -152,7 +161,7 @@ export default function MeetingLobby({meetingId}: MeetingLobbyProps) {
                     WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)',
                 }}
             >
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-800 via-zinc-950 to-black" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-muted via-background to-background dark:from-zinc-800 dark:via-zinc-950 dark:to-black" />
             </div>
 
 <div className="relative flex min-h-screen items-center justify-center p-4 md:p-8 lg:p-12">
@@ -165,13 +174,13 @@ export default function MeetingLobby({meetingId}: MeetingLobbyProps) {
                     {/* Header */}
                     <div className="flex flex-col gap-3 text-center lg:text-left items-center lg:items-start">
                         <motion.div variants={fadeUp}>
-                            <div className="group w-fit rounded-full border border-white/5 bg-neutral-900/50 px-4 py-1">
+                            <div className="group w-fit rounded-full border border-border/50 bg-muted/50 px-4 py-1 dark:bg-neutral-900/50">
                                 <AnimatedShinyText className="inline-flex items-center justify-center text-xs font-bold uppercase tracking-[0.2em]">
                                     <Spinner variant={'bars'} size={16} className={'mr-2'}/>  Waiting for host...
                                 </AnimatedShinyText>
                             </div>
                         </motion.div>
-                        <h1 className="text-2xl sm:text-3xl lg:text-5xl font-extrabold tracking-tight font-(family-name:--font-share-tech) uppercase text-white/90">
+                        <h1 className="text-2xl sm:text-3xl lg:text-5xl font-extrabold tracking-tight font-(family-name:--font-share-tech) uppercase text-foreground/90">
                             Set up your space
                         </h1>
                     </div>
@@ -181,8 +190,8 @@ export default function MeetingLobby({meetingId}: MeetingLobbyProps) {
                         
                         {/* Left: User Preview & Controls */}
                         <div className="flex flex-col gap-6 lg:gap-8 w-full justify-self-center max-w-2xl">
-                            <div className="relative aspect-video w-full overflow-hidden rounded-[1.5rem] lg:rounded-[2.5rem] border border-white/10 bg-black/40 shadow-2xl group">
-                                <div className="size-full bg-zinc-900/40">
+                            <div className="relative aspect-video w-full overflow-hidden rounded-[1.5rem] lg:rounded-[2.5rem] border border-border/50 bg-card shadow-2xl group dark:bg-black/40">
+                                <div className="size-full bg-muted/20 dark:bg-zinc-900/40">
                                     {mediaPreferences.videoEnabled ? (
                                         <video
                                             ref={videoRef}
@@ -193,10 +202,10 @@ export default function MeetingLobby({meetingId}: MeetingLobbyProps) {
                                         />
                                     ) : (
                                         <div className="flex size-full items-center justify-center bg-zinc-900/60 backdrop-blur-2xl">
-                                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,transparent_70%)]" />
-                                            <Avatar className="size-20 lg:size-40 border-4 border-white/5 bg-white/5 shadow-2xl backdrop-blur-3xl">
+                                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(var(--primary-rgb),0.03)_0%,transparent_70%)]" />
+                                            <Avatar className="size-20 lg:size-40 border-4 border-border/20 bg-muted/50 shadow-2xl backdrop-blur-3xl dark:border-white/5 dark:bg-white/5">
                                                 {user?.imageUrl && <AvatarImage src={user.imageUrl} />}
-                                                <AvatarFallback className="bg-transparent text-3xl lg:text-5xl font-bold text-white/80">
+                                                <AvatarFallback className="bg-transparent text-3xl lg:text-5xl font-bold text-foreground/80 dark:text-white/80">
                                                     {user?.firstName ? user.firstName.slice(0, 2).toUpperCase() : "CB"}
                                                 </AvatarFallback>
                                             </Avatar>
@@ -205,7 +214,7 @@ export default function MeetingLobby({meetingId}: MeetingLobbyProps) {
                                 </div>
 
                                 {/* Bottom Controls - Floating Dock Style */}
-                                <div className="absolute inset-x-0 bottom-0 flex items-center justify-center p-4 lg:p-8 pt-16 lg:pt-24 bg-gradient-to-t from-black/90 via-black/40 to-transparent">
+                                <div className="absolute inset-x-0 bottom-0 flex items-center justify-center p-4 lg:p-8 pt-16 lg:pt-24 bg-gradient-to-t from-background/90 via-background/40 to-transparent dark:from-black/90 dark:via-black/40">
                                     <FloatingDock
                                         items={[
                                             {
@@ -224,7 +233,7 @@ export default function MeetingLobby({meetingId}: MeetingLobbyProps) {
                                                 title: "Settings",
                                                 icon: <Settings2 size={20} />,
                                                 onClick: () => setShowSettings(!showSettings),
-                                                className: cn(showSettings && "!bg-white/20 !border-white/30"),
+                                                className: cn(showSettings && "!bg-primary/10 !border-primary/20 dark:!bg-white/20 dark:!border-white/30"),
                                             },
                                         ]}
                                         desktopClassName="bg-transparent border-none backdrop-blur-0 shadow-none"
@@ -239,24 +248,24 @@ export default function MeetingLobby({meetingId}: MeetingLobbyProps) {
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                             exit={{ opacity: 0 }}
-                                            className="absolute inset-0 z-50 flex items-center justify-center p-8 bg-black/80 backdrop-blur-xl"
+                                            className="absolute inset-0 z-50 flex items-center justify-center p-8 bg-background/80 backdrop-blur-xl dark:bg-black/80"
                                         >
                                             <div className="w-full max-w-sm flex flex-col gap-6">
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="p-2 rounded-xl bg-white/5">
-                                                            <Settings2 size={20} className="text-white" />
+                                                        <div className="p-2 rounded-xl bg-muted dark:bg-white/5">
+                                                            <Settings2 size={20} className="text-foreground dark:text-white" />
                                                         </div>
-                                                        <h3 className="text-base font-bold uppercase tracking-wider text-white">Settings</h3>
+                                                        <h3 className="text-base font-bold uppercase tracking-wider text-foreground dark:text-white">Settings</h3>
                                                     </div>
-                                                    <Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white" onClick={() => setShowSettings(false)}>
+                                                    <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground/40 hover:text-foreground dark:text-white/40 dark:hover:text-white" onClick={() => setShowSettings(false)}>
                                                         <X size={18} />
                                                     </Button>
                                                 </div>
 
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div className="space-y-3">
-                                                        <div className="flex items-center gap-2 text-white/40">
+                                                        <div className="flex items-center gap-2 text-muted-foreground/60">
                                                             <Camera size={14} />
                                                             <p className="text-[10px] font-bold uppercase tracking-wider">Camera</p>
                                                         </div>
@@ -265,10 +274,10 @@ export default function MeetingLobby({meetingId}: MeetingLobbyProps) {
                                                             onValueChange={value => setMediaPreferences({videoDeviceId: value === "default" ? "" : value})}
                                                             disabled={!mediaPreferences.videoEnabled}
                                                         >
-                                                            <SelectTrigger className="w-full bg-white/5 border-white/10 rounded-xl h-10 text-white text-xs">
+                                                            <SelectTrigger className="w-full bg-muted/50 border-border rounded-xl h-10 text-foreground text-xs dark:bg-white/5 dark:border-white/10 dark:text-white">
                                                                 <SelectValue placeholder="Default" />
                                                             </SelectTrigger>
-                                                            <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                                                            <SelectContent className="bg-popover border-border text-popover-foreground dark:bg-zinc-900 dark:border-white/10 dark:text-white">
                                                                 <SelectGroup>
                                                                     <SelectItem value="default">System Default</SelectItem>
                                                                     {videoDevices.map((device, index) => (
@@ -282,7 +291,7 @@ export default function MeetingLobby({meetingId}: MeetingLobbyProps) {
                                                     </div>
 
                                                     <div className="space-y-3">
-                                                        <div className="flex items-center gap-2 text-white/40">
+                                                        <div className="flex items-center gap-2 text-muted-foreground/60">
                                                             <Mic size={14} />
                                                             <p className="text-[10px] font-bold uppercase tracking-wider">Mic</p>
                                                         </div>
@@ -291,10 +300,10 @@ export default function MeetingLobby({meetingId}: MeetingLobbyProps) {
                                                             onValueChange={value => setMediaPreferences({audioDeviceId: value === "default" ? "" : value})}
                                                             disabled={!mediaPreferences.audioEnabled}
                                                         >
-                                                            <SelectTrigger className="w-full bg-white/5 border-white/10 rounded-xl h-10 text-white text-xs">
+                                                            <SelectTrigger className="w-full bg-muted/50 border-border rounded-xl h-10 text-foreground text-xs dark:bg-white/5 dark:border-white/10 dark:text-white">
                                                                 <SelectValue placeholder="Default" />
                                                             </SelectTrigger>
-                                                            <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                                                            <SelectContent className="bg-popover border-border text-popover-foreground dark:bg-zinc-900 dark:border-white/10 dark:text-white">
                                                                 <SelectGroup>
                                                                     <SelectItem value="default">System Default</SelectItem>
                                                                     {audioDevices.map((device, index) => (
@@ -316,10 +325,10 @@ export default function MeetingLobby({meetingId}: MeetingLobbyProps) {
                             </div>
                             
                             {/* Joining Status & Actions */}
-                            <div className="flex items-center justify-between w-full p-4 lg:p-5 rounded-2xl bg-white/5 border border-white/10 shadow-lg backdrop-blur-sm">
+                            <div className="flex items-center justify-between w-full p-4 lg:p-5 rounded-2xl bg-card border border-border/50 shadow-lg backdrop-blur-sm dark:bg-white/5 dark:border-white/10">
                                 <div className="flex flex-col gap-1 text-left">
-                                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">Secured Meeting ID</p>
-                                    <code className="text-sm font-mono tracking-widest text-white/80">{meetingId}</code>
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground/60 dark:text-white/40">Secured Meeting ID</p>
+                                    <code className="text-sm font-mono tracking-widest text-foreground/80 dark:text-white/80">{meetingId}</code>
                                 </div>
                                 <Button 
                                     variant="destructive" 

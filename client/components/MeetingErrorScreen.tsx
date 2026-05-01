@@ -50,7 +50,7 @@ export default function MeetingErrorScreen({
                         height={72}
                         backgroundOpacity={isRejected ? 0.05 : 0.05}
                         blur={30}
-                        className={isRejected ? "border border-destructive/20" : "border border-white/5"}
+                        className={isRejected ? "border border-destructive/20" : "border border-border/50 dark:border-white/5"}
                         contentClassName="flex items-center justify-center"
                     >
                         {isRejected ? (

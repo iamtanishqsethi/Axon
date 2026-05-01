@@ -34,27 +34,27 @@ export default function SettingsDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-[480px] overflow-hidden border border-white/[0.08] bg-zinc-950/70 p-7 shadow-2xl backdrop-blur-3xl sm:rounded-[32px]">
+            <DialogContent className="max-w-[480px] overflow-hidden border border-border/50 bg-background/80 p-7 shadow-2xl backdrop-blur-3xl sm:rounded-[32px] dark:bg-zinc-950/70 dark:border-white/[0.08]">
                 <DialogHeader className="mb-4">
-                    <DialogTitle className="flex flex-row items-center gap-3 text-2xl font-semibold tracking-tight text-white">
-                        <div className="flex size-10 items-center justify-center rounded-2xl bg-white/[0.05] border border-white/5 shadow-inner">
-                            <Settings className="size-5 text-white/90" />
+                    <DialogTitle className="flex flex-row items-center gap-3 text-2xl font-semibold tracking-tight text-foreground">
+                        <div className="flex size-10 items-center justify-center rounded-2xl bg-muted border border-border shadow-inner dark:bg-white/[0.05] dark:border-white/5">
+                            <Settings className="size-5 text-foreground/90 dark:text-white/90" />
                         </div>
                         Settings
                     </DialogTitle>
                 </DialogHeader>
 
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col text-white w-full">
-                    <TabsList className="relative flex h-14 w-full rounded-[20px] border border-white/[0.05] bg-white/[0.03] p-1.5 shadow-inner">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col text-foreground w-full">
+                    <TabsList className="relative flex h-14 w-full rounded-[20px] border border-border bg-muted/30 p-1.5 shadow-inner dark:border-white/[0.05] dark:bg-white/[0.03]">
                         <TabsTrigger
                             value="audio"
-                            className="relative flex-1 rounded-2xl text-white/50 transition-all data-[state=active]:text-white sm:h-full bg-transparent overflow-hidden"
+                            className="relative flex-1 rounded-2xl text-muted-foreground/60 transition-all data-[state=active]:text-foreground sm:h-full bg-transparent overflow-hidden dark:text-white/50 dark:data-[state=active]:text-white"
                             tabIndex={-1}
                         >
                             {activeTab === "audio" && (
                                 <motion.div
                                     layoutId="active-settings-tab"
-                                    className="absolute inset-0 z-0 rounded-2xl bg-white/[0.08] shadow-[0_0_20px_rgba(255,255,255,0.03)]"
+                                    className="absolute inset-0 z-0 rounded-2xl bg-background/80 shadow-md dark:bg-white/[0.08] dark:shadow-[0_0_20px_rgba(255,255,255,0.03)]"
                                     transition={{type: "spring", stiffness: 300, damping: 28}}
                                 />
                             )}
@@ -65,13 +65,13 @@ export default function SettingsDialog({
                         </TabsTrigger>
                         <TabsTrigger
                             value="video"
-                            className="relative flex-1 rounded-2xl text-white/50 transition-all data-[state=active]:text-white sm:h-full bg-transparent overflow-hidden"
+                            className="relative flex-1 rounded-2xl text-muted-foreground/60 transition-all data-[state=active]:text-foreground sm:h-full bg-transparent overflow-hidden dark:text-white/50 dark:data-[state=active]:text-white"
                             tabIndex={-1}
                         >
                             {activeTab === "video" && (
                                 <motion.div
                                     layoutId="active-settings-tab"
-                                    className="absolute inset-0 z-0 rounded-2xl bg-white/[0.08] shadow-[0_0_20px_rgba(255,255,255,0.03)]"
+                                    className="absolute inset-0 z-0 rounded-2xl bg-background/80 shadow-md dark:bg-white/[0.08] dark:shadow-[0_0_20px_rgba(255,255,255,0.03)]"
                                     transition={{type: "spring", stiffness: 300, damping: 28}}
                                 />
                             )}
@@ -82,13 +82,13 @@ export default function SettingsDialog({
                         </TabsTrigger>
                         <TabsTrigger
                             value="general"
-                            className="relative flex-1 rounded-2xl text-white/50 transition-all data-[state=active]:text-white sm:h-full bg-transparent overflow-hidden"
+                            className="relative flex-1 rounded-2xl text-muted-foreground/60 transition-all data-[state=active]:text-foreground sm:h-full bg-transparent overflow-hidden dark:text-white/50 dark:data-[state=active]:text-white"
                             tabIndex={-1}
                         >
                             {activeTab === "general" && (
                                 <motion.div
                                     layoutId="active-settings-tab"
-                                    className="absolute inset-0 z-0 rounded-2xl bg-white/[0.08] shadow-[0_0_20px_rgba(255,255,255,0.03)]"
+                                    className="absolute inset-0 z-0 rounded-2xl bg-background/80 shadow-md dark:bg-white/[0.08] dark:shadow-[0_0_20px_rgba(255,255,255,0.03)]"
                                     transition={{type: "spring", stiffness: 300, damping: 28}}
                                 />
                             )}
@@ -116,21 +116,21 @@ export default function SettingsDialog({
                                 {activeTab === "audio" && (
                                     <>
                                         <div className="flex flex-col gap-3">
-                                            <span className="pl-1 text-sm font-medium text-white/60">Microphone</span>
-                                            <div className="rounded-[20px] border border-white/[0.06] bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-2 [&_.lk-active>button]:bg-white/10 [&_.lk-active>button]:font-medium [&_.lk-active>button]:text-white [&_[data-lk-active=true]>button]:bg-white/10 [&_[data-lk-active=true]>button]:font-medium [&_[data-lk-active=true]>button]:text-white [&_button:hover]:bg-white/[0.06] [&_button:hover]:text-white/90 [&_button]:w-full [&_button]:rounded-2xl [&_button]:px-4 [&_button]:py-3.5 [&_button]:text-left [&_button]:text-sm [&_button]:text-zinc-400 [&_button]:transition-all [&_li]:list-none [&>ul]:flex [&>ul]:flex-col [&>ul]:gap-1">
+                                            <span className="pl-1 text-sm font-medium text-muted-foreground/60 dark:text-white/60">Microphone</span>
+                                            <div className="rounded-[20px] border border-border bg-muted/20 p-2 [&_.lk-active>button]:bg-primary/10 [&_.lk-active>button]:font-medium [&_.lk-active>button]:text-primary [&_[data-lk-active=true]>button]:bg-primary/10 [&_[data-lk-active=true]>button]:font-medium [&_[data-lk-active=true]>button]:text-primary [&_button:hover]:bg-muted/80 [&_button:hover]:text-foreground [&_button]:w-full [&_button]:rounded-2xl [&_button]:px-4 [&_button]:py-3.5 [&_button]:text-left [&_button]:text-sm [&_button]:text-muted-foreground/60 [&_button]:transition-all [&_li]:list-none [&>ul]:flex [&>ul]:flex-col [&>ul]:gap-1 dark:border-white/[0.06] dark:bg-white/[0.02] dark:[&_button:hover]:bg-white/[0.06] dark:[&_button:hover]:text-white/90 dark:[&_button]:text-zinc-400 dark:[&_.lk-active>button]:bg-white/10 dark:[&_.lk-active>button]:text-white dark:[&_[data-lk-active=true]>button]:bg-white/10 dark:[&_[data-lk-active=true]>button]:text-white">
                                                 <MediaDeviceSelect kind="audioinput" />
                                             </div>
                                         </div>
 
-                                        <div className="flex flex-col gap-5 rounded-[24px] border border-white/[0.06] bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-6 shadow-[-10px_-10px_30px_4px_rgba(255,255,255,0.01)_inset]">
+                                        <div className="flex flex-col gap-5 rounded-[24px] border border-border bg-muted/20 p-6 shadow-inner dark:border-white/[0.06] dark:bg-white/[0.02]">
                                             <div className="flex items-center justify-between gap-3">
-                                                <span className="flex items-center gap-3 text-sm font-medium text-white/80">
-                                                    <div className="flex size-9 items-center justify-center rounded-full bg-white/[0.08] shadow-inner border border-white/5">
-                                                        <Volume2 className="size-4 text-white/90" />
+                                                <span className="flex items-center gap-3 text-sm font-medium text-foreground/80 dark:text-white/80">
+                                                    <div className="flex size-9 items-center justify-center rounded-full bg-muted shadow-inner border border-border dark:bg-white/[0.08] dark:border-white/5">
+                                                        <Volume2 className="size-4 text-foreground/90 dark:text-white/90" />
                                                     </div>
                                                     Output volume
                                                 </span>
-                                                <span className="tabular-nums text-sm font-medium text-white/50">{outputVolume[0]}%</span>
+                                                <span className="tabular-nums text-sm font-medium text-muted-foreground/70 dark:text-white/50">{outputVolume[0]}%</span>
                                             </div>
                                             <Slider
                                                 value={outputVolume}
@@ -138,17 +138,17 @@ export default function SettingsDialog({
                                                 max={100}
                                                 step={1}
                                                 aria-label="Output volume"
-                                                className="mt-1 [&_[data-slot=slider-range]]:bg-white/90 [&_[data-slot=slider-thumb]]:border border-white/10 [&_[data-slot=slider-thumb]]:bg-white [&_[data-slot=slider-thumb]]:shadow-[0_0_15px_rgba(255,255,255,0.4)] [&_[data-slot=slider-thumb]]:focus-visible:ring-white/20 [&_[data-slot=slider-track]]:bg-white/10 [&_[data-slot=slider-track]]:h-2 [&_[data-slot=slider-thumb]]:size-5"
+                                                className="mt-1 [&_[data-slot=slider-range]]:bg-primary [&_[data-slot=slider-thumb]]:border border-black/10 [&_[data-slot=slider-thumb]]:bg-background [&_[data-slot=slider-thumb]]:shadow-md [&_[data-slot=slider-thumb]]:focus-visible:ring-primary/20 [&_[data-slot=slider-track]]:bg-muted [&_[data-slot=slider-track]]:h-2 [&_[data-slot=slider-thumb]]:size-5 dark:[&_[data-slot=slider-range]]:bg-white/90 dark:[&_[data-slot=slider-thumb]]:bg-white dark:[&_[data-slot=slider-track]]:bg-white/10 dark:[&_[data-slot=slider-thumb]]:border-white/10"
                                             />
                                         </div>
 
-                                        <div className="flex items-center justify-between rounded-[24px] border border-white/[0.06] bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-6 shadow-[-10px_-10px_30px_4px_rgba(255,255,255,0.01)_inset]">
-                                            <span className="text-sm font-medium text-white/80">Noise suppression</span>
+                                        <div className="flex items-center justify-between rounded-[24px] border border-border bg-muted/20 p-6 shadow-inner dark:border-white/[0.06] dark:bg-white/[0.02]">
+                                            <span className="text-sm font-medium text-foreground/80 dark:text-white/80">Noise suppression</span>
                                             <Switch
                                                 checked={noiseSuppression}
                                                 onCheckedChange={setNoiseSuppression}
                                                 aria-label="Toggle noise suppression"
-                                                className="data-[state=checked]:bg-white data-[state=unchecked]:bg-white/10 [&_[data-slot=switch-thumb]]:data-[state=checked]:bg-zinc-950 [&_[data-slot=switch-thumb]]:data-[state=unchecked]:bg-white/50 border-white/10 shadow-inner"
+                                                className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted border-border shadow-inner dark:data-[state=checked]:bg-white dark:data-[state=unchecked]:bg-white/10 dark:border-white/10 [&_[data-slot=switch-thumb]]:bg-background dark:[&_[data-slot=switch-thumb]]:bg-zinc-950"
                                             />
                                         </div>
                                     </>
@@ -157,8 +157,8 @@ export default function SettingsDialog({
                                 {activeTab === "video" && (
                                     <>
                                         <div className="flex flex-col gap-3">
-                                            <span className="pl-1 text-sm font-medium text-white/60">Camera</span>
-                                            <div className="rounded-[20px] border border-white/[0.06] bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-2 [&_.lk-active>button]:bg-white/10 [&_.lk-active>button]:font-medium [&_.lk-active>button]:text-white [&_[data-lk-active=true]>button]:bg-white/10 [&_[data-lk-active=true]>button]:font-medium [&_[data-lk-active=true]>button]:text-white [&_button:hover]:bg-white/[0.06] [&_button:hover]:text-white/90 [&_button]:w-full [&_button]:rounded-2xl [&_button]:px-4 [&_button]:py-3.5 [&_button]:text-left [&_button]:text-sm [&_button]:text-zinc-400 [&_button]:transition-all [&_li]:list-none [&>ul]:flex [&>ul]:flex-col [&>ul]:gap-1">
+                                            <span className="pl-1 text-sm font-medium text-muted-foreground/60 dark:text-white/60">Camera</span>
+                                            <div className="rounded-[20px] border border-border bg-muted/20 p-2 [&_.lk-active>button]:bg-primary/10 [&_.lk-active>button]:font-medium [&_.lk-active>button]:text-primary [&_[data-lk-active=true]>button]:bg-primary/10 [&_[data-lk-active=true]>button]:font-medium [&_[data-lk-active=true]>button]:text-primary [&_button:hover]:bg-muted/80 [&_button:hover]:text-foreground [&_button]:w-full [&_button]:rounded-2xl [&_button]:px-4 [&_button]:py-3.5 [&_button]:text-left [&_button]:text-sm [&_button]:text-muted-foreground/60 [&_button]:transition-all [&_li]:list-none [&>ul]:flex [&>ul]:flex-col [&>ul]:gap-1 dark:border-white/[0.06] dark:bg-white/[0.02] dark:[&_button:hover]:bg-white/[0.06] dark:[&_button:hover]:text-white/90 dark:[&_button]:text-zinc-400 dark:[&_.lk-active>button]:bg-white/10 dark:[&_.lk-active>button]:text-white dark:[&_[data-lk-active=true]>button]:bg-white/10 dark:[&_[data-lk-active=true]>button]:text-white">
                                                 <MediaDeviceSelect kind="videoinput" />
                                             </div>
                                         </div>
@@ -167,18 +167,18 @@ export default function SettingsDialog({
 
                                 {activeTab === "general" && (
                                     <>
-                                        <div className="flex items-center justify-between gap-3 rounded-[24px] border border-white/[0.06] bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-6 shadow-[-10px_-10px_30px_4px_rgba(255,255,255,0.01)_inset]">
+                                        <div className="flex items-center justify-between gap-3 rounded-[24px] border border-border bg-muted/20 p-6 shadow-inner dark:border-white/[0.06] dark:bg-white/[0.02]">
                                             <div>
-                                                <p className="text-sm font-medium text-white/90">Layout mode</p>
-                                                <p className="mt-1.5 text-xs text-white/50 leading-relaxed">Choose how participants<br/>are displayed in the meeting</p>
+                                                <p className="text-sm font-medium text-foreground/90 dark:text-white/90">Layout mode</p>
+                                                <p className="mt-1.5 text-xs text-muted-foreground/60 leading-relaxed dark:text-white/50">Choose how participants<br/>are displayed in the meeting</p>
                                             </div>
-                                            <div className="flex rounded-full bg-white/[0.04] p-1.5 border border-white/[0.02] shadow-inner">
+                                            <div className="flex rounded-full bg-muted p-1.5 border border-border shadow-inner dark:bg-white/[0.04] dark:border-white/[0.02]">
                                                 <Button
                                                     type="button"
                                                     size="sm"
                                                     variant="ghost"
                                                     onClick={() => onLayoutModeChange("grid")}
-                                                    className={`flex h-9 items-center rounded-full px-5 text-xs font-medium transition-all ${layoutMode === "grid" ? "bg-white/[0.12] text-white shadow-md " : "text-white/40 hover:text-white/80"}`}
+                                                    className={`flex h-9 items-center rounded-full px-5 text-xs font-medium transition-all ${layoutMode === "grid" ? "bg-background text-foreground shadow-md dark:bg-white/[0.12] dark:text-white" : "text-muted-foreground/60 hover:text-foreground dark:text-white/40 dark:hover:text-white/80"}`}
                                                 >
                                                     <LayoutGrid className="mr-1 size-3.5" />
                                                     Grid
@@ -188,7 +188,7 @@ export default function SettingsDialog({
                                                     size="sm"
                                                     variant="ghost"
                                                     onClick={() => onLayoutModeChange("speaker")}
-                                                    className={`flex h-9 items-center rounded-full px-5 text-xs font-medium transition-all ${layoutMode === "speaker" ? "bg-white/[0.12] text-white shadow-md " : "text-white/40  hover:text-white/80"}`}
+                                                    className={`flex h-9 items-center rounded-full px-5 text-xs font-medium transition-all ${layoutMode === "speaker" ? "bg-background text-foreground shadow-md dark:bg-white/[0.12] dark:text-white" : "text-muted-foreground/60 hover:text-foreground dark:text-white/40 dark:hover:text-white/80"}`}
                                                 >
                                                     <User className="mr-1 size-3.5" />
                                                     Speaker

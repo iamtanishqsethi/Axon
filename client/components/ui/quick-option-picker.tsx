@@ -114,10 +114,10 @@ export const OptionPicker: FC<OptionPickerProps> = ({ options, value, onChange, 
                       whileHover={{ y: -1 }}
                       title={`Set as ${option.label}`}
                       aria-label={`Select ${option.label}`}
-                      className={`relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-all duration-300 ${roundedClasses} bg-white/10 hover:bg-white/20 dark:bg-neutral-700 ${
+                      className={`relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-all duration-300 ${roundedClasses} bg-primary/10 hover:bg-primary/20 dark:bg-neutral-700 ${
                         isActive
-                          ? "text-white"
-                          : "text-white/60"
+                          ? "text-primary dark:text-white"
+                          : "text-muted-foreground dark:text-white/60"
                       }`}
                     >
                       <motion.span>
@@ -145,8 +145,8 @@ export const OptionPicker: FC<OptionPickerProps> = ({ options, value, onChange, 
           aria-expanded={isOpen}
           className={cn(`flex items-center justify-center gap-1.5 rounded-full border border-transparent px-3 py-1.5 transition-all duration-300 select-none ${
             isOpen
-              ? "bg-white/15"
-              : "bg-white/5"
+              ? "bg-primary/10 dark:bg-white/15"
+              : "bg-muted/50 dark:bg-white/5"
           }`, className)}
         >
           <AnimatePresence mode="popLayout" initial={false}>
@@ -161,15 +161,15 @@ export const OptionPicker: FC<OptionPickerProps> = ({ options, value, onChange, 
                 size={16}
                 className={`transition-colors duration-300 ${
                   isOpen
-                    ? "text-white/40"
-                    : "text-white/60"
+                    ? "text-primary/70 dark:text-white/40"
+                    : "text-muted-foreground dark:text-white/60"
                 }`}
               />
             </motion.div>
           </AnimatePresence>
           <AnimatedText
             value={selected.label}
-            className="text-xs uppercase tracking-widest font-bold text-white/90"
+            className="text-xs uppercase tracking-widest font-bold text-foreground/90 dark:text-white/90"
           />
 
           <motion.div
@@ -180,8 +180,8 @@ export const OptionPicker: FC<OptionPickerProps> = ({ options, value, onChange, 
               size={14}
               className={`transition-colors duration-300 ${
                 isOpen
-                  ? "text-white/40"
-                  : "text-white/60"
+                  ? "text-primary/70 dark:text-white/40"
+                  : "text-muted-foreground dark:text-white/60"
               }`}
               strokeWidth={3}
             />

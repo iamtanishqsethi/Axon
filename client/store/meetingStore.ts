@@ -54,5 +54,9 @@ export const useMeetingStore = create<MeetingStore>((set)=>({
     setActivePanel: (panel) => set({activePanel: panel}),
     togglePanel: (panel) => set((state) => ({
         activePanel: state.activePanel === panel ? null : panel
-    }))
+    })),
+
+    // waiting room
+    waitingRoomCount: 0,
+    setWaitingRoomCount: (count) => set({waitingRoomCount: count}),
 }))

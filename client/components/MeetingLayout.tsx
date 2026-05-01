@@ -12,6 +12,7 @@ import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {playMeetingSound, warmMeetingSounds} from "@/lib/meeting-sounds";
 import MeetingEndedScreen from "@/components/MeetingEndedScreen";
 import MeetingErrorScreen from "@/components/MeetingErrorScreen";
+import MeetingLeftScreen from "@/components/MeetingLeftScreen";
 
 interface MeetingLayoutProps {
     meetingId: string;
@@ -30,6 +31,7 @@ export default function MeetingLayout({meetingId}: MeetingLayoutProps ){
     const isLeavingRef = useRef(false)
     const meetingEndedRef = useRef(false)
     const [meetingEnded, setMeetingEnded] = useState(false)
+    const [meetingLeft, setMeetingLeft] = useState(false)
 
     const LIVEKIT_URL = process.env.NEXT_PUBLIC_LIVEKIT_URL;
 
@@ -43,15 +45,15 @@ export default function MeetingLayout({meetingId}: MeetingLayoutProps ){
             if (isHost) {
                 playMeetingSound("waiting");
                 toast.custom((t) => (
-                    <div className="flex w-full items-center gap-3 rounded-xl border border-white/10 bg-black/60 p-4 text-sm text-white/90 shadow-2xl backdrop-blur-xl">
-                        <Avatar className="h-8 w-8 border border-white/10 bg-white/5">
+                    <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8 border border-border/50 bg-muted/50 dark:bg-white/5">
                             <AvatarImage src={payload.imageUrl} alt={payload.userName} />
                             <AvatarFallback className="bg-transparent font-medium">
                                 {payload.userName?.charAt(0).toUpperCase() || '?'}
                             </AvatarFallback>
                         </Avatar>
-                        <span className="font-medium tracking-wide">
-                            <span className="font-bold text-white">{payload.userName}</span> is waiting to join
+                        <span className="text-sm font-medium tracking-wide">
+                            <span className="font-bold text-foreground dark:text-white">{payload.userName}</span> is waiting to join
                         </span>
                     </div>
                 ));
@@ -103,7 +105,7 @@ export default function MeetingLayout({meetingId}: MeetingLayoutProps ){
             })
             clearToken()
             setHost(false)
-            router.push('/')
+            setMeetingLeft(true)
         }
         catch (e){
             console.error("Error Leaving meeting",e)
@@ -133,6 +135,10 @@ export default function MeetingLayout({meetingId}: MeetingLayoutProps ){
 
     if (meetingEnded) {
         return <MeetingEndedScreen message="This meeting has already ended." />;
+    }
+
+    if (meetingLeft) {
+        return <MeetingLeftScreen />;
     }
 
     if (!token || !LIVEKIT_URL) {

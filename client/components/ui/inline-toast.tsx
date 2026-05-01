@@ -62,7 +62,7 @@ export const InlineToast: FC<InlineCopyToastProps> = ({
               }}
               className="flex w-full items-center justify-between"
             >
-              <span className="text-sm font-bold tracking-tight text-white/70">
+              <span className="text-sm font-bold tracking-tight text-foreground/70 dark:text-white/70">
                 {code}
               </span>
 
@@ -75,7 +75,7 @@ export const InlineToast: FC<InlineCopyToastProps> = ({
                   stiffness: 350,
                   damping: 18,
                 }}
-                className="relative cursor-pointer overflow-hidden rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white shadow-sm hover:bg-white/20"
+                className="relative cursor-pointer overflow-hidden rounded-full bg-muted px-3 py-1 text-xs font-bold text-foreground shadow-sm hover:bg-muted/80 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
               >
                 <motion.span
                   initial={{ x: '-120%' }}
@@ -98,10 +98,10 @@ export const InlineToast: FC<InlineCopyToastProps> = ({
                 bounce: 0,
                 duration: 0.4,
               }}
-              className="flex w-full items-center justify-center gap-2 text-white"
+              className="flex w-full items-center justify-center gap-2 text-primary dark:text-white"
             >
               <CheckCircle2 size={16} />
-              <span className="text-xs font-bold">Copied!</span>
+              <span className="text-xs font-bold text-primary dark:text-white">Copied!</span>
             </motion.div>
           )}
         </AnimatePresence>

@@ -44,11 +44,11 @@ export function MeetingTopBar({duration, roomName, layoutMode, onLayoutModeChang
                 <GlassSurface
                     borderRadius={999}
                     width="auto"
-                    height="auto"
+                    height={36}
                     backgroundOpacity={0.05}
                     blur={20}
-                    className="overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]"
-                    contentClassName="gap-2 px-3 py-1.5 font-mono text-white/90"
+                    className="overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]"
+                    contentClassName="gap-2 px-3 py-1.5 font-mono text-foreground/90 dark:text-white/90"
                 >
                     <Radio className="animate-pulse text-red-400 size-4" />
                     {getFormatedTime(duration)}
@@ -63,10 +63,10 @@ export function MeetingTopBar({duration, roomName, layoutMode, onLayoutModeChang
                 <GlassSurface
                     borderRadius={999}
                     width="auto"
-                    height="auto"
+                    height={36}
                     backgroundOpacity={0.05}
                     blur={20}
-                    className="hidden md:block shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]"
+                    className="hidden md:block shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]"
                     contentClassName="p-0"
                 >
                     <OptionPicker
@@ -88,10 +88,10 @@ export function MeetingTopBar({duration, roomName, layoutMode, onLayoutModeChang
                 <GlassSurface
                     borderRadius={999}
                     width="auto"
-                    height={40}
+                    height={36}
                     backgroundOpacity={0.05}
                     blur={20}
-                    className="overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]"
+                    className="overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]"
                     contentClassName="p-0"
                 >
                     <InlineToast code={meetingId} className="min-w-[140px] h-full" />

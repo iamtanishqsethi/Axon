@@ -16,31 +16,38 @@ interface Track {
 const ElevatorTracks: Track[] = [
   {
     id: 1,
-    title: "Elevator Bossa Nova",
-    artist: "Corporate Chill",
-    src: "https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8a7315b.mp3",
-    image: "https://images.unsplash.com/photo-1541887258327-020478db1894?w=400&h=400&fit=crop"
+    title: "Bossa Nova Background",
+    artist: "music_for_video",
+    src: "https://cdn.pixabay.com/audio/2022/03/10/11-54-10-10900_128.mp3",
+    image: "https://cdn.pixabay.com/photo/2022/07/15/15/34/vinyl-record-7323561_1280.jpg"
   },
   {
     id: 2,
-    title: "Lobby Vibes",
-    artist: "Muzak Masters",
-    src: "https://cdn.pixabay.com/audio/2022/02/07/audio_03134f7f6f.mp3",
-    image: "https://images.unsplash.com/photo-1578330776510-7e3fccf7d0c7?w=400&h=400&fit=crop"
+    title: "Jazz Lounge Elevator",
+    artist: "HitsLab",
+    src: "https://cdn.pixabay.com/audio/2024/09/23/16-23-14-322314_128.mp3",
+    image: "https://cdn.pixabay.com/photo/2016/11/18/15/58/elevator-1835492_1280.jpg"
   },
   {
     id: 3,
-    title: "Waiting Room Groove",
-    artist: "The Hold Tones",
-    src: "https://cdn.pixabay.com/audio/2022/01/21/audio_3106199468.mp3",
-    image: "https://images.unsplash.com/photo-1563212046-24e52643a29b?w=400&h=400&fit=crop"
+    title: "Lounge Jazz Vibe",
+    artist: "STAROSTIN",
+    src: "https://cdn.pixabay.com/audio/2024/07/26/18-12-14-489965_128.mp3",
+    image: "https://cdn.pixabay.com/photo/2015/10/05/14/40/trumpet-972605_1280.jpg"
   },
   {
     id: 4,
-    title: "Going Up",
-    artist: "Floor 42",
-    src: "https://cdn.pixabay.com/audio/2024/05/21/audio_e6e9f60f64.mp3",
-    image: "https://images.unsplash.com/photo-1509114781476-d703057e930f?w=400&h=400&fit=crop"
+    title: "Elevator Jazz Lounge",
+    artist: "ikoliks_aj",
+    src: "https://cdn.pixabay.com/audio/2024/02/14/15-22-14-419360_128.mp3",
+    image: "https://cdn.pixabay.com/photo/2016/11/29/03/42/bench-1867140_1280.jpg"
+  },
+  {
+    id: 5,
+    title: "Smooth Lobby Jazz",
+    artist: "ikoliks_aj",
+    src: "https://cdn.pixabay.com/audio/2024/02/14/15-22-14-342629_128.mp3",
+    image: "https://cdn.pixabay.com/photo/2016/11/19/12/25/audio-1838992_1280.jpg"
   }
 ];
 
@@ -68,46 +75,18 @@ export const RecordPlayer: React.FC<RecordPlayerProps> = ({
   }, []);
 
   useEffect(() => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio();
-      audioRef.current.loop = false;
-    }
-
-    const audio = audioRef.current;
-    
-    const handleEnded = () => {
-      if (currentTrackIndex < ElevatorTracks.length - 1) {
-        nextTrack();
-      } else {
-        onToggle();
-      }
-    };
-
-    audio.addEventListener('ended', handleEnded);
-    return () => {
-      audio.removeEventListener('ended', handleEnded);
-      audio.pause();
-    };
-  }, [currentTrackIndex, onToggle, nextTrack]);
-
-  useEffect(() => {
-    if (!audioRef.current || !currentTrack) return;
-    const audio = audioRef.current;
-
-    // Only update source if it has changed
-    if (audio.src !== currentTrack.src) {
-      audio.src = currentTrack.src;
-      audio.load();
-    }
+    if (!audioRef.current) return;
 
     if (isPlaying) {
-      audio.play().catch(error => {
-        console.error("Playback failed:", error);
+      // Attempt play immediately. If it fails (e.g. NotSupportedError in Safari),
+      // the onCanPlay/onLoadedData event handlers on the <audio> element will retry.
+      audioRef.current.play().catch(error => {
+        console.warn("Immediate play attempt failed, will retry on media ready:", error);
       });
     } else {
-      audio.pause();
+      audioRef.current.pause();
     }
-  }, [currentTrack, isPlaying]);
+  }, [isPlaying, currentTrack.src]);
 
   const handlePlayPause = () => {
     onToggle();
@@ -118,8 +97,25 @@ export const RecordPlayer: React.FC<RecordPlayerProps> = ({
     nextTrack();
   };
 
+  const handleMediaReady = () => {
+    if (isPlaying && audioRef.current) {
+      audioRef.current.play().catch(error => {
+        console.warn("Retry playback on media ready failed:", error);
+      });
+    }
+  };
+
   return (
     <div className="relative flex flex-col items-center justify-center gap-8 group">
+      <audio 
+        ref={audioRef}
+        src={currentTrack.src}
+        onEnded={nextTrack}
+        onCanPlay={handleMediaReady}
+        onLoadedData={handleMediaReady}
+        preload="auto"
+        playsInline
+      />
       <div className="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96">
         {/* Record Player Base */}
         <div className="absolute inset-0 bg-[#1a1a1a] rounded-3xl border border-white/5 shadow-2xl overflow-hidden">
@@ -134,7 +130,7 @@ export const RecordPlayer: React.FC<RecordPlayerProps> = ({
           animate={{ rotate: isPlaying && !isChangingTrack ? 360 : 0 }}
           transition={{
             repeat: isPlaying && !isChangingTrack ? Infinity : 0,
-            duration: 3,
+            duration: 4,
             ease: "linear",
           }}
           className={cn(

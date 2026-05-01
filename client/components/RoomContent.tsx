@@ -46,7 +46,8 @@ export function RoomContent({
     const activePanel = useMeetingStore(store => store.activePanel);
     const setActivePanel = useMeetingStore(store => store.setActivePanel);
     const togglePanel = useMeetingStore(store => store.togglePanel);
-
+    const waitingRoomCount = useMeetingStore(store => store.waitingRoomCount);
+    const setWaitingRoomCount = useMeetingStore(store => store.setWaitingRoomCount);
     const room = useRoomContext();
     const [duration, setDuration] = useState(0);
     const [layoutMode, setLayoutMode] = useState<"grid" | "speaker">("grid");
@@ -115,6 +116,21 @@ export function RoomContent({
         };
     }, [room]);
 
+    // Initial waiting room fetch for host
+    useEffect(() => {
+        if (!isHost) return;
+        const fetchWaiting = async () => {
+            try {
+                const { getWaitingRoom } = await import("@/services/api");
+                const data = await getWaitingRoom(meetingId);
+                setWaitingRoomCount(data.length);
+            } catch (error) {
+                console.error("Error fetching waiting room initial count:", error);
+            }
+        };
+        fetchWaiting();
+    }, [isHost, meetingId, setWaitingRoomCount]);
+
     // Participant join/leave toasts
     useEffect(() => {
         const handleParticipant = (participant: Participant, action: "joined" | "left") => {
@@ -132,15 +148,15 @@ export function RoomContent({
             }
 
             toast.custom((t) => (
-                <div className="flex w-full items-center gap-3 rounded-xl border border-white/10 bg-black/60 p-4 text-sm text-white/90 shadow-2xl backdrop-blur-xl">
-                    <Avatar className="h-8 w-8 border border-white/10 bg-white/5">
+                <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8 border border-border/50 bg-muted/50 dark:bg-white/5">
                         <AvatarImage src={imageUrl} alt={displayName} />
                         <AvatarFallback className="bg-transparent font-medium">
                             {displayName.charAt(0).toUpperCase()}
                         </AvatarFallback>
                     </Avatar>
-                    <span className="font-medium tracking-wide">
-                        <span className="font-bold text-white">{displayName}</span> has {action}
+                    <span className="text-sm font-medium tracking-wide">
+                        <span className="font-bold text-foreground dark:text-white">{displayName}</span> has {action}
                     </span>
                 </div>
             ));
@@ -197,10 +213,29 @@ export function RoomContent({
         };
 
         socket.on("reaction", handleReaction);
+        
+        const handleNewWaitingUser = () => {
+            if (isHost) {
+                const fetchWaiting = async () => {
+                    try {
+                        const { getWaitingRoom } = await import("@/services/api");
+                        const data = await getWaitingRoom(meetingId);
+                        setWaitingRoomCount(data.length);
+                    } catch (error) {
+                        console.error("Error updating waiting count:", error);
+                    }
+                };
+                fetchWaiting();
+            }
+        };
+
+        socket.on("new-waiting-user", handleNewWaitingUser);
+
         return () => {
             socket.off("reaction", handleReaction);
+            socket.off("new-waiting-user", handleNewWaitingUser);
         };
-    }, []);
+    }, [isHost, meetingId, setWaitingRoomCount]);
 
     const togglePin = (trackId: string) => {
         setPinnedTrackId(current => current === trackId ? null : trackId);
@@ -235,7 +270,7 @@ export function RoomContent({
                 >
                     <Spinner variant={'bars'} size={40} />
                     <div className="text-center">
-                        <h2 className="text-2xl font-bold tracking-wide font-(family-name:--font-share-tech) uppercase text-white/90">
+                        <h2 className="text-2xl font-bold tracking-wide font-(family-name:--font-share-tech) uppercase text-foreground/90">
                             {room.state === "connecting" ? "Entering Room" : "Reconnecting"}
                         </h2>
                         <p className="text-muted-foreground mt-2 text-sm">
@@ -262,7 +297,7 @@ export function RoomContent({
                     <main className="relative min-h-0 flex-1 overflow-hidden p-3 pb-24 pt-16 sm:p-4 sm:pb-24 sm:pt-16">
                         {activePanel === "editor" || activePanel === "whiteboard" ? (
                             <div className="grid h-full min-h-0 gap-3 lg:grid-cols-[minmax(0,0.72fr)_minmax(14rem,0.28fr)]">
-                                <div className="min-h-[22rem] w-full h-full relative rounded-xl overflow-hidden border border-white/10 shadow-2xl">
+                                <div className="min-h-[22rem] w-full h-full relative rounded-xl overflow-hidden border border-border shadow-2xl dark:border-white/10">
                                     {activePanel === "editor" ? (
                                         <CollaborativeEditor 
                                             roomId={meetingId} 
@@ -313,6 +348,7 @@ export function RoomContent({
                             onTogglePanel={togglePanel}
                             activePanel={activePanel}
                             unreadCount={visibleUnreadCount}
+                            waitingRoomCount={waitingRoomCount}
                             layoutMode={layoutMode}
                             onLayoutModeChange={setLayoutMode}
                             isHost={isHost}

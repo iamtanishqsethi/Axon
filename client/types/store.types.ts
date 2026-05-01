@@ -64,4 +64,7 @@ export interface MeetingStore {
     setActivePanel: (panel: "chat" | "participants" | "editor" | "whiteboard" | null) => void
     togglePanel: (panel: "chat" | "participants" | "editor" | "whiteboard") => void
 
+    // waiting room
+    waitingRoomCount: number
+    setWaitingRoomCount: (count: number) => void
 }

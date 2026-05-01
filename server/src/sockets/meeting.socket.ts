@@ -3,7 +3,7 @@ import {prisma} from "../lib/prisma.js";
 import * as meetingService from "../services/meeting.service.js";
 export default function registerMeetingSocket(io:Server) {
     //authentication middleware
-    io.use((socket,next)=>{
+    io.of('/').use((socket,next)=>{
         const userId=socket.handshake.auth.userId
         if(!userId){
             return next(new Error("Unauthorized"))

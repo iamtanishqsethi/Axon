@@ -34,6 +34,7 @@ interface MeetingDockProps {
     onTogglePanel: (panel: "chat" | "participants" | "editor" | "whiteboard") => void;
     activePanel: "chat" | "participants" | "editor" | "whiteboard" | null;
     unreadCount: number;
+    waitingRoomCount: number;
     layoutMode: "grid" | "speaker";
     onLayoutModeChange: (mode: "grid" | "speaker") => void;
     isHost: boolean;
@@ -49,6 +50,7 @@ export default function MeetingDock({
     onTogglePanel,
     activePanel,
     unreadCount,
+    waitingRoomCount,
     isHost,
 }: MeetingDockProps) {
     const room = useRoomContext();
@@ -132,7 +134,7 @@ export default function MeetingDock({
                             <Smile />
                         </div>
                     </PopoverTrigger>
-                    <PopoverContent side="top" className="w-fit rounded-xl bg-white/5 border border-white/10 p-2 backdrop-blur-2xl shadow-2xl">
+                    <PopoverContent side="top" className="w-fit rounded-xl bg-popover border border-border p-2 backdrop-blur-2xl shadow-2xl dark:bg-white/5 dark:border-white/10">
                         <div className="flex gap-1">
                             {reactionItems.map((emoji) => (
                                 <Button
@@ -142,7 +144,7 @@ export default function MeetingDock({
                                     size="icon"
                                     aria-label={`React ${emoji}`}
                                     onClick={() => onReaction(emoji)}
-                                    className="interactive-lift size-10 text-xl hover:bg-white/10"
+                                    className="interactive-lift size-10 text-xl hover:bg-muted"
                                 >
                                     {emoji}
                                 </Button>
@@ -156,19 +158,28 @@ export default function MeetingDock({
             title: "Editor",
             icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-code"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
             onClick: () => onTogglePanel("editor"),
-            className: cn(activePanel === "editor" && "!bg-white/15 !border-white/30"),
+            className: cn(activePanel === "editor" && "!bg-primary/10 !border-primary/30 dark:!bg-white/15 dark:!border-white/30"),
         },
         {
             title: "Whiteboard",
             icon: <Pen />,
             onClick: () => onTogglePanel("whiteboard"),
-            className: cn(activePanel === "whiteboard" && "!bg-white/15 !border-white/30"),
+            className: cn(activePanel === "whiteboard" && "!bg-primary/10 !border-primary/30 dark:!bg-white/15 dark:!border-white/30"),
         },
         {
             title: "Participants",
-            icon: <Users />,
+            icon: (
+                <div className="relative flex size-full items-center justify-center">
+                    <Users />
+                    {isHost && waitingRoomCount > 0 && (
+                        <Badge className="absolute -top-1 -right-1 min-w-4 px-1 text-[10px] bg-red-500 text-white border-none">
+                            {waitingRoomCount > 9 ? "9+" : waitingRoomCount}
+                        </Badge>
+                    )}
+                </div>
+            ),
             onClick: () => onTogglePanel("participants"),
-            className: cn(activePanel === "participants" && "!bg-white/15 !border-white/30"),
+            className: cn(activePanel === "participants" && "!bg-primary/10 !border-primary/30 dark:!bg-white/15 dark:!border-white/30"),
         },
         {
             title: "Chat",
@@ -176,14 +187,14 @@ export default function MeetingDock({
                 <div className="relative flex size-full items-center justify-center">
                     <MessageCircle />
                     {unreadCount > 0 && (
-                        <Badge className="absolute -top-1 -right-1 min-w-4 px-1 text-[10px] bg-primary text-white border-none animate-pulse">
+                        <Badge className="absolute -top-1 -right-1 min-w-4 px-1 text-[10px] bg-primary text-white border-none">
                             {unreadCount > 9 ? "9+" : unreadCount}
                         </Badge>
                     )}
                 </div>
             ),
             onClick: () => onTogglePanel("chat"),
-            className: cn(activePanel === "chat" && "!bg-white/15 !border-white/30"),
+            className: cn(activePanel === "chat" && "!bg-primary/10 !border-primary/30 dark:!bg-white/15 dark:!border-white/30"),
         },
         {
             title: "Settings",
@@ -223,7 +234,16 @@ export default function MeetingDock({
         },
         {
             label: "Participants",
-            icon: <Users className="size-4" />,
+            icon: (
+                <div className="relative">
+                    <Users className="size-4" />
+                    {isHost && waitingRoomCount > 0 && (
+                        <Badge className="absolute -top-2 -right-2 min-w-4 px-1 text-[8px] bg-red-500 text-white border-none">
+                            {waitingRoomCount > 9 ? "9+" : waitingRoomCount}
+                        </Badge>
+                    )}
+                </div>
+            ),
             onClick: () => { onTogglePanel("participants"); setMoreOpen(false); },
             className: cn(activePanel === "participants" && "text-primary"),
         },
@@ -303,7 +323,7 @@ export default function MeetingDock({
                         <button
                             onClick={() => runMediaAction("mic", () => localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled))}
                             className={cn(
-                                "flex size-11 items-center justify-center rounded-full bg-white/10 border border-white/10 backdrop-blur-md transition-colors",
+                                "flex size-11 items-center justify-center rounded-full bg-background/60 border border-border backdrop-blur-md transition-colors dark:bg-white/10 dark:border-white/10",
                                 !isMicrophoneEnabled && "!bg-red-500/20 !text-red-400 !border-red-500/30"
                             )}
                         >
@@ -316,7 +336,7 @@ export default function MeetingDock({
                         <button
                             onClick={() => runMediaAction("camera", () => localParticipant.setCameraEnabled(!isCameraEnabled))}
                             className={cn(
-                                "flex size-11 items-center justify-center rounded-full bg-white/10 border border-white/10 backdrop-blur-md transition-colors",
+                                "flex size-11 items-center justify-center rounded-full bg-background/60 border border-border backdrop-blur-md transition-colors dark:bg-white/10 dark:border-white/10",
                                 !isCameraEnabled && "!bg-red-500/20 !text-red-400 !border-red-500/30"
                             )}
                         >
@@ -328,13 +348,13 @@ export default function MeetingDock({
                         {/* Reactions */}
                         <Popover>
                             <PopoverTrigger asChild>
-                                <button className="flex size-11 items-center justify-center rounded-full bg-white/10 border border-white/10 backdrop-blur-md transition-colors">
+                                <button className="flex size-11 items-center justify-center rounded-full bg-background/60 border border-border backdrop-blur-md transition-colors dark:bg-white/10 dark:border-white/10">
                                     <div className="flex size-5 items-center justify-center">
                                         <Smile />
                                     </div>
                                 </button>
                             </PopoverTrigger>
-                            <PopoverContent side="top" className="w-fit rounded-xl bg-white/5 border border-white/10 p-2 backdrop-blur-2xl shadow-2xl">
+                            <PopoverContent side="top" className="w-fit rounded-xl bg-popover border border-border p-2 backdrop-blur-2xl shadow-2xl dark:bg-white/5 dark:border-white/10">
                                 <div className="flex gap-1">
                                     {reactionItems.map((emoji) => (
                                         <Button
@@ -344,7 +364,7 @@ export default function MeetingDock({
                                             size="icon"
                                             aria-label={`React ${emoji}`}
                                             onClick={() => onReaction(emoji)}
-                                            className="interactive-lift size-10 text-xl hover:bg-white/10"
+                                            className="interactive-lift size-10 text-xl hover:bg-muted"
                                         >
                                             {emoji}
                                         </Button>
@@ -357,14 +377,14 @@ export default function MeetingDock({
                         <Popover open={moreOpen} onOpenChange={setMoreOpen}>
                             <PopoverTrigger asChild>
                                 <button className={cn(
-                                    "relative flex size-11 items-center justify-center rounded-full bg-white/10 border border-white/10 backdrop-blur-md transition-colors",
-                                    moreOpen && "!bg-white/20 !border-white/30"
+                                    "relative flex size-11 items-center justify-center rounded-full bg-background/60 border border-border backdrop-blur-md transition-colors dark:bg-white/10 dark:border-white/10",
+                                    moreOpen && "!bg-muted !border-primary/20 dark:!bg-white/20 dark:!border-white/30"
                                 )}>
                                     <div className="flex size-5 items-center justify-center">
                                         <MoreHorizontal />
                                     </div>
                                     {unreadCount > 0 && (
-                                        <Badge className="absolute -top-1 -right-1 min-w-4 px-1 text-[10px] bg-primary text-white border-none animate-pulse">
+                                        <Badge className="absolute -top-1 -right-1 min-w-4 px-1 text-[10px] bg-primary text-white border-none">
                                             {unreadCount > 9 ? "9+" : unreadCount}
                                         </Badge>
                                     )}
@@ -373,7 +393,7 @@ export default function MeetingDock({
                             <PopoverContent
                                 side="top"
                                 align="center"
-                                className="w-48 rounded-2xl bg-black/80 border border-white/10 p-1.5 backdrop-blur-2xl shadow-2xl"
+                                className="w-48 rounded-2xl bg-popover/90 border border-border p-1.5 backdrop-blur-2xl shadow-2xl dark:bg-black/80 dark:border-white/10"
                             >
                                 <div className="flex flex-col gap-0.5">
                                     {mobileSecondaryItems.map((item) => (
@@ -381,7 +401,7 @@ export default function MeetingDock({
                                             key={item.label}
                                             onClick={item.onClick}
                                             className={cn(
-                                                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-white/80 transition-colors hover:bg-white/10",
+                                                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground/80 transition-colors hover:bg-muted dark:text-white/80 dark:hover:bg-white/10",
                                                 item.className
                                             )}
                                         >

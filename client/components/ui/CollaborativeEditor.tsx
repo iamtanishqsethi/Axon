@@ -6,6 +6,7 @@ import { SocketIOProvider } from "y-socket.io";
 import { MonacoBinding } from "y-monaco";
 import Editor from "@monaco-editor/react";
 import { ChevronDown, Play, Trash2, Terminal, Loader2 } from "lucide-react";
+import { useTheme } from "next-themes";
 
 interface CollaborativeEditorProps {
   roomId: string;
@@ -48,6 +49,8 @@ export default function CollaborativeEditor({ roomId, userName }: CollaborativeE
   const [output, setOutput] = useState("");
   const [isRunning, setIsRunning] = useState(false);
   const [outputType, setOutputType] = useState<"idle" | "success" | "error">("idle");
+  const { theme, resolvedTheme } = useTheme();
+  const currentTheme = resolvedTheme || theme || "dark";
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const editorRef = useRef<any>(null);
@@ -78,13 +81,26 @@ export default function CollaborativeEditor({ roomId, userName }: CollaborativeE
       const user = state.user;
       if (!user?.name) return;
 
-      const heads = document.querySelectorAll(`.yRemoteSelectionHead[data-client-id="${clientId}"], .yRemoteSelectionHead-${clientId}`);
+      // Find all elements for this user. y-monaco typically uses .yRemoteSelectionHead and .yRemoteSelectionHead-${clientId}
+      const heads = document.querySelectorAll(`.yRemoteSelectionHead[data-client-id="${clientId}"], .yRemoteSelectionHead-${clientId}, .yRemoteSelectionHead`);
+      
       heads.forEach((h) => {
         const el = h as HTMLElement;
-        el.setAttribute("data-user-name", user.name);
-        el.setAttribute("data-client-id", String(clientId));
-        if (user.color) {
-          el.style.setProperty("--cursor-color", user.color);
+        
+        // We need to make sure we're applying it to the correct user's cursor
+        // If it's a generic .yRemoteSelectionHead, we might need a better way to map it, 
+        // but usually y-monaco adds the clientId class or attribute.
+        
+        // If the element doesn't have a client ID yet, and it's not our own, 
+        // we might have a race condition or it might be another user's.
+        // For now, we trust the specific selectors.
+        
+        if (el.classList.contains(`yRemoteSelectionHead-${clientId}`) || el.getAttribute('data-client-id') === String(clientId)) {
+          el.setAttribute("data-user-name", user.name);
+          el.setAttribute("data-client-id", String(clientId));
+          if (user.color) {
+            el.style.setProperty("--cursor-color", user.color);
+          }
         }
       });
     });
@@ -100,9 +116,12 @@ export default function CollaborativeEditor({ roomId, userName }: CollaborativeE
     ydocRef.current = ydoc;
 
     // Connect to Yjs WebSocket via socket.io
-    const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5050";
+    const serverUrl = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5050";
 
-    const provider = new SocketIOProvider(serverUrl, roomId, ydoc, {
+    // Use a unique room name for the editor to avoid conflicts with whiteboard
+    const editorRoomId = `editor-${roomId}`;
+
+    const provider = new SocketIOProvider(serverUrl, editorRoomId, ydoc, {
       autoConnect: true,
     });
     providerRef.current = provider;
@@ -164,6 +183,9 @@ export default function CollaborativeEditor({ roomId, userName }: CollaborativeE
     provider.awareness.on("change", () => {
       requestAnimationFrame(() => applyCursorLabels(provider));
     });
+
+    // Initial apply
+    setTimeout(() => applyCursorLabels(provider), 500);
   };
 
   // ─── Language change handler ─────────────────────────────────────
@@ -239,7 +261,7 @@ export default function CollaborativeEditor({ roomId, userName }: CollaborativeE
           <button
             onClick={runCode}
             disabled={isRunning}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider rounded-full transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed bg-white/10 hover:bg-white/15 text-white border border-white/10 hover:border-white/20"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider rounded-full transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
           >
             {isRunning ? (
               <>
@@ -259,7 +281,7 @@ export default function CollaborativeEditor({ roomId, userName }: CollaborativeE
         <div ref={dropdownRef} className="relative">
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg bg-white/[0.06] hover:bg-white/10 text-white/80 hover:text-white transition-colors border border-white/[0.08] hover:border-white/15"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg bg-muted hover:bg-muted/80 text-foreground transition-colors border border-border"
           >
             <span className="text-[10px] font-mono font-bold text-white/40 w-5 text-center">{language.icon}</span>
             <span className="hidden sm:inline">{language.label}</span>
@@ -267,18 +289,18 @@ export default function CollaborativeEditor({ roomId, userName }: CollaborativeE
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-1.5 w-44 max-h-72 overflow-y-auto rounded-xl z-[100] bg-black/80 backdrop-blur-2xl border border-white/10 shadow-[0_16px_48px_rgba(0,0,0,0.5)] py-1">
+            <div className="absolute right-0 top-full mt-1.5 w-44 max-h-72 overflow-y-auto rounded-xl z-[100] bg-popover/90 backdrop-blur-2xl border border-border shadow-2xl py-1 dark:bg-black/80 dark:border-white/10">
               {LANGUAGES.map((lang) => (
                 <button
                   key={lang.id}
                   onClick={() => handleLanguageChange(lang)}
                   className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors ${
                     language.id === lang.id
-                      ? "bg-white/10 text-white"
-                      : "text-white/60 hover:bg-white/[0.06] hover:text-white/90"
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`}
                 >
-                  <span className="text-[10px] font-mono font-bold text-white/40 w-5 text-center">{lang.icon}</span>
+                  <span className="text-[10px] font-mono font-bold text-muted-foreground/40 w-5 text-center">{lang.icon}</span>
                   {lang.label}
                   {language.id === lang.id && (
                     <div className="ml-auto size-1.5 rounded-full bg-white" />
@@ -296,7 +318,7 @@ export default function CollaborativeEditor({ roomId, userName }: CollaborativeE
           <Editor
             height="100%"
             language={language.monacoId}
-            theme="vs-dark"
+            theme={currentTheme === "dark" ? "vs-dark" : "light"}
             onMount={handleEditorDidMount}
             options={{
               minimap: { enabled: false },
@@ -314,19 +336,19 @@ export default function CollaborativeEditor({ roomId, userName }: CollaborativeE
         </div>
 
         {/* Output Panel */}
-        <div className="h-36 flex flex-col border-t border-white/10 bg-white/[0.02]">
-          <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/[0.06]">
+        <div className="h-36 flex flex-col border-t border-border/50 bg-muted/20">
+          <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/30">
             <div className="flex items-center gap-1.5">
-              <Terminal size={11} className="text-white/30" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/40">Output</span>
+              <Terminal size={11} className="text-muted-foreground/40" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60">Output</span>
               {outputType === "error" && (
-                <span className="text-[9px] font-bold uppercase tracking-wider text-red-400/80 bg-red-400/10 px-1.5 py-0.5 rounded-full">Error</span>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-full">Error</span>
               )}
             </div>
             {output && (
               <button
                 onClick={() => { setOutput(""); setOutputType("idle"); }}
-                className="flex items-center gap-1 text-[10px] text-white/30 hover:text-white/60 transition-colors"
+                className="flex items-center gap-1 text-[10px] text-muted-foreground/40 hover:text-muted-foreground transition-colors"
               >
                 <Trash2 size={10} />
                 <span className="hidden sm:inline">Clear</span>
@@ -336,12 +358,12 @@ export default function CollaborativeEditor({ roomId, userName }: CollaborativeE
           <div className="flex-1 px-3 py-2 overflow-y-auto font-mono text-[13px] leading-relaxed">
             {output ? (
               <pre className={`whitespace-pre-wrap break-words ${
-                outputType === "error" ? "text-red-400/90" : "text-white/80"
+                outputType === "error" ? "text-red-500/90" : "text-foreground/80"
               }`}>
                 {output}
               </pre>
             ) : (
-              <span className="text-white/20 text-xs italic">
+              <span className="text-muted-foreground/30 text-xs italic">
                 {isRunning ? "Executing..." : 'Click "Run" to execute your code.'}
               </span>
             )}

@@ -3,14 +3,14 @@
 import {useEffect, useMemo, useState} from "react";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
-import {Home, PhoneOff} from "lucide-react";
+import {Home, LogOut} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import GlassSurface from "@/components/GlassSurface";
 import { FlickeringGrid } from "@/components/ui/flickering-grid";
 import {motion} from "framer-motion";
 import {AnimatedCircularProgressBar} from "@/components/ui/animated-circular-progress-bar";
 
-interface MeetingEndedScreenProps {
+interface MeetingLeftScreenProps {
     message?: string;
     redirectAfterSeconds?: number;
 }
@@ -20,10 +20,10 @@ const fadeUp = {
     show: {opacity: 1, y: 0, transition: {duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const}},
 };
 
-export default function MeetingEndedScreen({
-    message = "This meeting has ended.",
+export default function MeetingLeftScreen({
+    message = "You have successfully left the meeting.",
     redirectAfterSeconds = 8,
-}: MeetingEndedScreenProps) {
+}: MeetingLeftScreenProps) {
     const router = useRouter();
     const [secondsLeft, setSecondsLeft] = useState(redirectAfterSeconds);
 
@@ -80,12 +80,12 @@ export default function MeetingEndedScreen({
                         className="border border-border/50 dark:border-white/5"
                         contentClassName="flex items-center justify-center"
                     >
-                        <PhoneOff className="size-8 text-muted-foreground" />
+                        <LogOut className="size-8 text-muted-foreground" />
                     </GlassSurface>
                     
                     <div className="flex flex-col gap-3">
                         <h1 className="text-3xl font-bold tracking-tight font-(family-name:--font-share-tech) uppercase text-foreground">
-                            Meeting ended
+                            You left the meeting
                         </h1>
                         <p className="text-sm text-muted-foreground">
                             {message} You will return home automatically.

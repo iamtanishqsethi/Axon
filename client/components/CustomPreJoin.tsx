@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, Mic, MicOff, VideoOff, Sparkles, User, ChevronDown, Settings2 } from "lucide-react";
+import { Camera, Mic, MicOff, Video, VideoOff, Sparkles, User, ChevronDown, Settings2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useMeetingStore } from "@/store/meetingStore";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,19 @@ import {
 } from "@/components/slide-to-unlock/slide-to-unlock";
 import {ShimmeringText} from "@/components/shimmering-text/shimmering-text";
 import useSound from "use-sound";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 interface CustomPreJoinProps {
     onSubmit: (values: {
@@ -35,6 +48,7 @@ interface CustomPreJoinProps {
         audioDeviceId: string;
     }) => void;
     userLabel?: string;
+    meetingId?: string;
 }
 
 function getInitials(name: string) {
@@ -43,7 +57,7 @@ function getInitials(name: string) {
     return initials.toUpperCase();
 }
 
-export default function CustomPreJoin({ onSubmit, userLabel = "" }: CustomPreJoinProps) {
+export default function CustomPreJoin({ onSubmit, userLabel = "", meetingId }: CustomPreJoinProps) {
     const { user } = useUser();
     const mediaPreferences = useMeetingStore(state => state.mediaPreferences);
     const setMediaPreferences = useMeetingStore(state => state.setMediaPreferences);
@@ -51,6 +65,8 @@ export default function CustomPreJoin({ onSubmit, userLabel = "" }: CustomPreJoi
     const videoRef = useRef<HTMLVideoElement>(null);
     const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
     const [micLevel, setMicLevel] = useState(0);
+    const [showSettings, setShowSettings] = useState(false);
+    const [previewStream, setPreviewStream] = useState<MediaStream | null>(null);
 
     const videoDevices = devices.filter(device => device.kind === "videoinput");
     const audioDevices = devices.filter(device => device.kind === "audioinput");
@@ -61,9 +77,12 @@ export default function CustomPreJoin({ onSubmit, userLabel = "" }: CustomPreJoi
         const loadDevices = async () => {
             try {
                 // Request permissions first to get labels
-                await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-                    .then(stream => stream.getTracks().forEach(t => t.stop()))
-                    .catch(() => {});
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+                    stream.getTracks().forEach(t => t.stop());
+                } catch (e) {
+                    console.warn("Initial permission request failed, likely missing hardware:", e);
+                }
                 
                 const nextDevices = await navigator.mediaDevices.enumerateDevices();
                 setDevices(nextDevices);
@@ -95,34 +114,46 @@ export default function CustomPreJoin({ onSubmit, userLabel = "" }: CustomPreJoi
                 const constraints = {
                     video: mediaPreferences.videoEnabled
                         ? {
-                            deviceId: mediaPreferences.videoDeviceId
-                                ? { exact: mediaPreferences.videoDeviceId }
-                                : undefined,
+                            ...(mediaPreferences.videoDeviceId ? { deviceId: { ideal: mediaPreferences.videoDeviceId } } : {}),
                             width: { ideal: 1280 },
                             height: { ideal: 720 }
                         }
                         : false,
                     audio: mediaPreferences.audioEnabled
-                        ? {
-                            deviceId: mediaPreferences.audioDeviceId
-                                ? { exact: mediaPreferences.audioDeviceId }
-                                : undefined,
-                        }
+                        ? (mediaPreferences.audioDeviceId ? { deviceId: { ideal: mediaPreferences.audioDeviceId } } : true)
                         : false,
                 };
                 
-                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia(constraints);
+                } catch (error) {
+                    console.warn("Failed to get both audio and video, trying fallback...", error);
+                    
+                    // Fallback: try only what is absolutely necessary
+                    if (mediaPreferences.videoEnabled && mediaPreferences.audioEnabled) {
+                        try {
+                            // Try audio only if video failed
+                            stream = await navigator.mediaDevices.getUserMedia({ 
+                                audio: mediaPreferences.audioDeviceId ? { deviceId: { ideal: mediaPreferences.audioDeviceId } } : true 
+                            });
+                        } catch (audioError) {
+                            console.error("Fallback to audio also failed:", audioError);
+                        }
+                    }
+                }
 
                 if (cancelled) {
-                    stream.getTracks().forEach(track => track.stop());
+                    stream?.getTracks().forEach(track => track.stop());
                     return;
                 }
+
+                setPreviewStream(stream);
 
                 if (videoRef.current && mediaPreferences.videoEnabled) {
                     videoRef.current.srcObject = stream;
                 }
 
-                const audioTrack = stream.getAudioTracks()[0];
+                const audioTrack = stream?.getAudioTracks()[0];
                 if (audioTrack && mediaPreferences.audioEnabled) {
                     audioContext = new AudioContext();
                     const analyser = audioContext.createAnalyser();
@@ -154,6 +185,7 @@ export default function CustomPreJoin({ onSubmit, userLabel = "" }: CustomPreJoi
             if (frame) cancelAnimationFrame(frame);
             void audioContext?.close();
             stream?.getTracks().forEach(track => track.stop());
+            setPreviewStream(null);
         };
     }, [
         mediaPreferences.audioDeviceId,
@@ -163,11 +195,6 @@ export default function CustomPreJoin({ onSubmit, userLabel = "" }: CustomPreJoi
     ]);
 
     const handleJoin = () => {
-        console.log("[CustomPreJoin] handleJoin triggered", {
-            username: username || "Anonymous",
-            video: mediaPreferences.videoEnabled,
-            audio: mediaPreferences.audioEnabled
-        });
         onSubmit({
             username: username || "Anonymous",
             videoEnabled: mediaPreferences.videoEnabled,
@@ -182,11 +209,10 @@ export default function CustomPreJoin({ onSubmit, userLabel = "" }: CustomPreJoi
     })
 
     return (
-        <Card className="w-full max-w-sm sm:max-w-md mx-auto border-white/10 bg-background/20 backdrop-blur-xl shadow-2xl overflow-hidden rounded-[24px]">
-
-            <CardContent className="flex flex-col gap-3 sm:gap-4 lg:gap-6 p-4 sm:p-6">
-                {/* Preview Area */}
-                <div className="relative aspect-video w-full rounded-xl lg:rounded-2xl overflow-hidden border border-white/10 bg-black/40 group shadow-inner">
+        <div className="flex flex-col gap-6 w-full max-w-lg mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Preview Container */}
+            <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[2.5rem] border border-border/50 bg-card shadow-2xl group dark:bg-black/40">
+                <div className="size-full bg-gradient-to-b from-neutral-400 to-neutral-600 dark:from-neutral-800 dark:to-neutral-900">
                     <AnimatePresence mode="wait">
                         {mediaPreferences.videoEnabled ? (
                             <motion.video
@@ -194,7 +220,12 @@ export default function CustomPreJoin({ onSubmit, userLabel = "" }: CustomPreJoi
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                ref={videoRef}
+                                ref={(el) => {
+                                    videoRef.current = el;
+                                    if (el && previewStream) {
+                                        el.srcObject = previewStream;
+                                    }
+                                }}
                                 autoPlay
                                 muted
                                 playsInline
@@ -206,172 +237,176 @@ export default function CustomPreJoin({ onSubmit, userLabel = "" }: CustomPreJoi
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="size-full flex flex-col items-center justify-center bg-neutral-900/50 relative overflow-hidden"
+                                className="size-full flex items-center justify-center relative overflow-hidden"
                             >
-                                <div className="absolute inset-0 bg-[linear-gradient(135deg,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_44%),linear-gradient(315deg,color-mix(in_oklch,var(--accent)_12%,transparent),transparent_48%)]" />
-                                <Avatar className="size-16 lg:size-24 border-2 border-white/10 bg-background/12 backdrop-blur shadow-2xl relative z-10">
+                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_0%,transparent_70%)]" />
+                                <Avatar className="size-24 lg:size-40 border-4 border-white/10 bg-white/5 shadow-2xl backdrop-blur-2xl">
                                     {user?.imageUrl && <AvatarImage src={user.imageUrl} alt={username} />}
-                                    <AvatarFallback className="bg-transparent text-xl lg:text-2xl font-semibold text-primary-foreground">
+                                    <AvatarFallback className="bg-transparent text-3xl lg:text-5xl font-bold text-white/90">
                                         {getInitials(username || user?.fullName || "Guest")}
                                     </AvatarFallback>
                                 </Avatar>
-                                <div className="absolute bottom-3 lg:bottom-4 left-3 lg:left-4 flex items-center gap-2 rounded-lg bg-black/55 px-2 lg:px-3 py-1 lg:py-1.5 text-[10px] lg:text-xs font-medium text-white backdrop-blur-lg z-10 border border-white/5">
-                                    <VideoOff className="size-3 lg:size-3.5" />
-                                    Camera off
-                                </div>
                             </motion.div>
                         )}
                     </AnimatePresence>
-                    
-                    {/* Audio Level Indicator */}
-                    {mediaPreferences.audioEnabled && (
-                        <div className="absolute bottom-3 right-3 lg:bottom-4 lg:right-4 flex items-center gap-1.5 px-2 lg:px-3 py-1 lg:py-1.5 rounded-full bg-black/55 backdrop-blur-lg border border-white/5 z-10">
-                            <Mic className="size-3 lg:size-3.5 text-primary" />
-                            <div className="flex gap-0.5 items-end h-3">
-                                {[...Array(5)].map((_, i) => (
-                                    <motion.div
-                                        key={i}
-                                        className="w-1 bg-primary rounded-full"
-                                        animate={{
-                                            height: `${Math.max(20, micLevel * (100 - i * 15))}%`
-                                        }}
-                                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
 
-                {/* Device Toggles & Selectors */}
-                <div className="flex flex-col gap-2.5 sm:gap-3 lg:gap-4">
-                    <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:gap-4">
-                        <GlassSurface borderRadius={999} className="w-full p-0.5" width="100%" height="auto">
-                            <label
-                                className={cn(
-                                    "w-full flex items-center justify-between px-2.5 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 rounded-full transition-all duration-300 cursor-pointer gap-1",
-                                    mediaPreferences.audioEnabled ? " text-primary" : " text-white/40"
-                                )}
-                            >
-                                <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 ">
-                                    {mediaPreferences.audioEnabled ? <Mic className="size-3.5 sm:size-4 lg:size-5" /> : <MicOff className="size-3.5 sm:size-4 lg:size-5" />}
-                                    <span className="text-[10px] sm:text-xs lg:text-sm font-bold uppercase tracking-wider">Audio</span>
-                                </div>
-                                <Switch 
-                                    checked={mediaPreferences.audioEnabled}
-                                    onCheckedChange={(checked) => setMediaPreferences({ audioEnabled: checked })}
-                                    className="scale-75 sm:scale-90 lg:scale-100"
-                                />
-                            </label>
-                        </GlassSurface>
-
-                        <GlassSurface borderRadius={999} className="w-full p-0.5" width="100%" height="auto">
-                            <label
-                                className={cn(
-                                    "w-full flex items-center justify-between px-2.5 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 rounded-full transition-all duration-300 cursor-pointer gap-1",
-                                    mediaPreferences.videoEnabled ? " text-primary" : " text-white/40"
-                                )}
-                            >
-                                <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
-                                    {mediaPreferences.videoEnabled ? <Camera className="size-3.5 sm:size-4 lg:size-5" /> : <VideoOff className="size-3.5 sm:size-4 lg:size-5" />}
-                                    <span className="text-[10px] sm:text-xs lg:text-sm font-bold uppercase tracking-wider">Video</span>
-                                </div>
-                                <Switch 
-                                    checked={mediaPreferences.videoEnabled}
-                                    onCheckedChange={(checked) => setMediaPreferences({ videoEnabled: checked })}
-                                    className="scale-75 sm:scale-90 lg:scale-100"
-                                />
-                            </label>
-                        </GlassSurface>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:gap-4">
-
-
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button 
-                                    variant="outline" 
-                                    disabled={!mediaPreferences.audioEnabled}
-                                    className="w-full h-9 sm:h-10 lg:h-12 justify-between border-white/10 rounded-full hover:bg-white/10 text-white/70 px-2.5 sm:px-3 lg:px-4 disabled:opacity-20 transition-all active:scale-[0.98]"
-                                >
-                                    <div className="flex items-center gap-1.5 sm:gap-2 truncate">
-                                        <Mic className="size-3 sm:size-3.5 lg:size-4 shrink-0" />
-                                        <span className="truncate text-[9px] sm:text-[10px] lg:text-xs font-medium">
-                                            {audioDevices.find(d => d.deviceId === mediaPreferences.audioDeviceId)?.label || "Select Mic"}
-                                        </span>
-                                    </div>
-                                    <ChevronDown className="size-3 lg:size-4 shrink-0 opacity-50" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" className="w-56 bg-neutral-900/90 backdrop-blur-xl border-white/10 rounded-xl">
-                                {audioDevices.map(device => (
-                                    <DropdownMenuItem 
-                                        key={device.deviceId} 
-                                        className="text-xs focus:bg-primary/20 focus:text-primary py-2.5 rounded-lg cursor-pointer"
-                                        onClick={() => setMediaPreferences({ audioDeviceId: device.deviceId })}
-                                    >
-                                        {device.label}
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                {/* Overlaid Controls */}
+                <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-4 p-8 pt-24 bg-gradient-to-t from-black/60 via-black/20 to-transparent">
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
                                 <Button
-                                    variant="outline"
-                                    disabled={!mediaPreferences.videoEnabled}
-                                    className="w-full h-9 sm:h-10 lg:h-12 justify-between border-white/10 rounded-full hover:bg-white/10 text-white/70 px-2.5 sm:px-3 lg:px-4 disabled:opacity-20 transition-all active:scale-[0.98]"
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() => setMediaPreferences({ audioEnabled: !mediaPreferences.audioEnabled })}
+                                    className={cn(
+                                        "size-12 rounded-full transition-all duration-300",
+                                        mediaPreferences.audioEnabled 
+                                            ? "bg-white/10 text-white hover:bg-white/20 border border-white/10" 
+                                            : "bg-red-500/20 text-red-500 hover:bg-red-500/30 border border-red-500/30"
+                                    )}
                                 >
-                                    <div className="flex items-center gap-1.5 sm:gap-2 truncate">
-                                        <Camera className="size-3 sm:size-3.5 lg:size-4 shrink-0" />
-                                        <span className="truncate text-[9px] sm:text-[10px] lg:text-xs font-medium">
-                                            {videoDevices.find(d => d.deviceId === mediaPreferences.videoDeviceId)?.label || "Select Camera"}
-                                        </span>
-                                    </div>
-                                    <ChevronDown className="size-3 lg:size-4 shrink-0 opacity-50" />
+                                    {mediaPreferences.audioEnabled ? <Mic size={20} /> : <MicOff size={20} />}
                                 </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" className="w-56 bg-neutral-900/90 backdrop-blur-xl border-white/10 rounded-xl">
-                                {videoDevices.map(device => (
-                                    <DropdownMenuItem
-                                        key={device.deviceId}
-                                        className="text-xs focus:bg-primary/20 focus:text-primary py-2.5 rounded-lg cursor-pointer"
-                                        onClick={() => setMediaPreferences({ videoDeviceId: device.deviceId })}
-                                    >
-                                        {device.label}
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{mediaPreferences.audioEnabled ? "Mute" : "Unmute"}</p>
+                            </TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() => setMediaPreferences({ videoEnabled: !mediaPreferences.videoEnabled })}
+                                    className={cn(
+                                        "size-12 rounded-full transition-all duration-300",
+                                        mediaPreferences.videoEnabled 
+                                            ? "bg-white/10 text-white hover:bg-white/20 border border-white/10" 
+                                            : "bg-red-500/20 text-red-500 hover:bg-red-500/30 border border-red-500/30"
+                                    )}
+                                >
+                                    {mediaPreferences.videoEnabled ? <Video size={20} /> : <VideoOff size={20} />}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{mediaPreferences.videoEnabled ? "Stop Video" : "Start Video"}</p>
+                            </TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() => setShowSettings(!showSettings)}
+                                    className={cn(
+                                        "size-12 rounded-full bg-white/10 text-white hover:bg-white/20 border border-white/10 transition-all duration-300",
+                                        showSettings && "bg-white/30 border-white/40"
+                                    )}
+                                >
+                                    <Settings2 size={20} />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Settings</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
 
-                {/* Final Join Button */}
+                {/* Settings Overlay */}
+                <AnimatePresence>
+                    {showSettings && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 z-50 flex items-center justify-center p-8 bg-background/80 backdrop-blur-xl dark:bg-black/80"
+                        >
+                            <div className="w-full max-w-sm flex flex-col gap-6">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 rounded-xl bg-muted dark:bg-white/5">
+                                            <Settings2 size={20} className="text-foreground dark:text-white" />
+                                        </div>
+                                        <h3 className="text-base font-bold uppercase tracking-wider text-foreground dark:text-white">Settings</h3>
+                                    </div>
+                                    <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground/40 hover:text-foreground dark:text-white/40 dark:hover:text-white" onClick={() => setShowSettings(false)}>
+                                        <X size={18} />
+                                    </Button>
+                                </div>
 
-                <SlideToUnlock
-                    className={'w-full rounded-full scale-95 sm:scale-100'}
-                    onUnlock={() => {
-                        try {
-                            play()
-                        } catch (e) {
-                            console.warn("[CustomPreJoin] Sound playback failed", e)
-                        }
-                        handleJoin()
-                    }}
-                >
-                    <SlideToUnlockTrack >
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2 text-muted-foreground/60">
+                                            <Camera size={14} />
+                                            <p className="text-[10px] font-bold uppercase tracking-wider">Camera</p>
+                                        </div>
+                                        <Select
+                                            value={mediaPreferences.videoDeviceId || "default"}
+                                            onValueChange={value => setMediaPreferences({ videoDeviceId: value === "default" ? "" : value })}
+                                            disabled={!mediaPreferences.videoEnabled}
+                                        >
+                                            <SelectTrigger className="w-full bg-muted/50 border-border rounded-xl h-10 text-foreground text-xs dark:bg-white/5 dark:border-white/10 dark:text-white">
+                                                <SelectValue placeholder="Default" />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-popover border-border text-popover-foreground dark:bg-zinc-900 dark:border-white/10 dark:text-white">
+                                                <SelectItem value="default">System Default</SelectItem>
+                                                {videoDevices.map((device, index) => (
+                                                    <SelectItem key={device.deviceId} value={device.deviceId}>
+                                                        {device.label || `Camera ${index + 1}`}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2 text-muted-foreground/60">
+                                            <Mic size={14} />
+                                            <p className="text-[10px] font-bold uppercase tracking-wider">Mic</p>
+                                        </div>
+                                        <Select
+                                            value={mediaPreferences.audioDeviceId || "default"}
+                                            onValueChange={value => setMediaPreferences({ audioDeviceId: value === "default" ? "" : value })}
+                                            disabled={!mediaPreferences.audioEnabled}
+                                        >
+                                            <SelectTrigger className="w-full bg-muted/50 border-border rounded-xl h-10 text-foreground text-xs dark:bg-white/5 dark:border-white/10 dark:text-white">
+                                                <SelectValue placeholder="Default" />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-popover border-border text-popover-foreground dark:bg-zinc-900 dark:border-white/10 dark:text-white">
+                                                <SelectItem value="default">System Default</SelectItem>
+                                                {audioDevices.map((device, index) => (
+                                                    <SelectItem key={device.deviceId} value={device.deviceId}>
+                                                        {device.label || `Mic ${index + 1}`}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+
+            {/* Bottom Info Bar */}
+            <div className="w-full px-2">
+                <SlideToUnlock onUnlock={handleJoin} className="w-full">
+                    <SlideToUnlockTrack>
+                        <SlideToUnlockHandle />
                         <SlideToUnlockText>
                             {({ isDragging }) => (
-                                <ShimmeringText text="Slide to Join" isStopped={isDragging} />
+                                <span>{isDragging ? "RELEASE" : "SLIDE TO JOIN"}</span>
                             )}
                         </SlideToUnlockText>
-                        <SlideToUnlockHandle className={'rounded-full'}/>
                     </SlideToUnlockTrack>
                 </SlideToUnlock>
-
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }
