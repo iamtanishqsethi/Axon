@@ -18,36 +18,22 @@ const ElevatorTracks: Track[] = [
     id: 1,
     title: "Bossa Nova Background",
     artist: "music_for_video",
-    src: "https://cdn.pixabay.com/audio/2022/03/10/11-54-10-10900_128.mp3",
+    src: "/music_for_video-elevator-music-bossa-nova-background-music-version-60s-10900.mp3",
     image: "https://cdn.pixabay.com/photo/2022/07/15/15/34/vinyl-record-7323561_1280.jpg"
   },
   {
     id: 2,
-    title: "Jazz Lounge Elevator",
-    artist: "HitsLab",
-    src: "https://cdn.pixabay.com/audio/2024/09/23/16-23-14-322314_128.mp3",
-    image: "https://cdn.pixabay.com/photo/2016/11/18/15/58/elevator-1835492_1280.jpg"
-  },
-  {
-    id: 3,
     title: "Lounge Jazz Vibe",
     artist: "STAROSTIN",
-    src: "https://cdn.pixabay.com/audio/2024/07/26/18-12-14-489965_128.mp3",
+    src: "/starostin-lounge-jazz-elevator-music-489965.mp3",
     image: "https://cdn.pixabay.com/photo/2015/10/05/14/40/trumpet-972605_1280.jpg"
   },
   {
-    id: 4,
+    id: 3,
     title: "Elevator Jazz Lounge",
     artist: "ikoliks_aj",
-    src: "https://cdn.pixabay.com/audio/2024/02/14/15-22-14-419360_128.mp3",
+    src: "/ikoliks_aj-jazz-lounge-elevator-music-332339.mp3",
     image: "https://cdn.pixabay.com/photo/2016/11/29/03/42/bench-1867140_1280.jpg"
-  },
-  {
-    id: 5,
-    title: "Smooth Lobby Jazz",
-    artist: "ikoliks_aj",
-    src: "https://cdn.pixabay.com/audio/2024/02/14/15-22-14-342629_128.mp3",
-    image: "https://cdn.pixabay.com/photo/2016/11/19/12/25/audio-1838992_1280.jpg"
   }
 ];
 
