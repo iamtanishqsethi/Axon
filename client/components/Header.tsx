@@ -45,9 +45,9 @@ export default function Header() {
                     <div className="flex items-center justify-between w-full px-8 py-1.5 relative">
                         <Link href="/" className="interactive-lift flex items-center gap-2.5 relative z-50">
                             <div className="flex size-8 items-center justify-center rounded-xl overflow-hidden shadow-sm shadow-primary/20">
-                                <img src="/icon.png" alt="CodeBeam Logo" className="size-full object-cover" />
+                                <img src="/icon.png" alt="Axon Logo" className="size-full object-cover" />
                             </div>
-                            <span className="text-lg font-bold tracking-tight font-(family-name:--font-share-tech) uppercase">Axon</span>
+                            <span className="text-lg font-bold tracking-tight uppercase">Axon</span>
                         </Link>
 
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -101,9 +101,9 @@ export default function Header() {
                         <MobileNavHeader>
                             <Link href="/" className="interactive-lift flex items-center gap-2">
                                 <div className="flex size-7 items-center justify-center rounded-lg overflow-hidden shadow-sm shadow-primary/20">
-                                    <img src="/icon.png" alt="CodeBeam Logo" className="size-full object-cover" />
+                                    <img src="/icon.png" alt="Axon Logo" className="size-full object-cover" />
                                 </div>
-                                <span className="text-base font-bold tracking-tight font-(family-name:--font-share-tech) uppercase">Axon</span>
+                                <span className="text-base font-bold tracking-tight uppercase">Axon</span>
                             </Link>
                             <div className="flex items-center gap-1.5">
                                 <AnimatedThemeToggler />
