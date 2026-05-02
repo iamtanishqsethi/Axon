@@ -4,11 +4,9 @@ import {useRouter} from 'next/navigation';
 import {createMeeting} from '@/services/api';
 import {useState} from 'react';
 import {useMeetingStore} from '@/store/meetingStore';
-import {Video, Sparkles, Layout} from 'lucide-react';
-import {Input} from '@/components/ui/input';
+import {Video} from 'lucide-react';
 import {motion} from 'framer-motion';
 import { Particles } from "@/components/ui/particles";
-import GlassSurface from "@/components/GlassSurface";
 import {AnimatedShinyText} from "@/components/ui/animated-shiny-text";
 import {cn} from "@/lib/utils";
 

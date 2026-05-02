@@ -11,9 +11,7 @@ import {
 } from "@/components/ui/resizable-navbar";
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
-import { Zap } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { AnimatedThemeToggler } from "./ui/animated-theme-toggler";
 import GlassSurface from "./GlassSurface";
 import { Button } from "./ui/button";
 
@@ -106,7 +104,6 @@ export default function Header() {
                                 <span className="text-base font-bold tracking-tight uppercase">Axon</span>
                             </Link>
                             <div className="flex items-center gap-1.5">
-                                <AnimatedThemeToggler />
                                 <Show when="signed-in">
                                     <UserButton />
                                 </Show>

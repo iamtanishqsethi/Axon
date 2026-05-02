@@ -62,7 +62,7 @@ export function StepsSection() {
                 className="h-full "
               >
                 <MagicCard
-        gradientColor={theme === "dark" ? "#262626" : "#D9D9D955"}
+        gradientColor={ "#262626"}
         className="p-0 rounded-[2rem] "
       >
                 <div

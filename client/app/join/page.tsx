@@ -3,15 +3,12 @@
 import {useRouter} from 'next/navigation';
 import {useState} from 'react';
 import {useMeetingStore} from '@/store/meetingStore';
-import {ArrowLeft, LogIn, Sparkles, Video} from 'lucide-react';
+import { LogIn, Sparkles, } from 'lucide-react';
 import {motion} from 'framer-motion';
 import { Particles } from "@/components/ui/particles";
-import GlassSurface from "@/components/GlassSurface";
 import {AnimatedShinyText} from "@/components/ui/animated-shiny-text";
 import {cn} from "@/lib/utils";
 import {FloatingInput} from "@/components/ui/floating-input";
-import {Button} from "@/components/ui/button";
-
 import CustomPreJoin from '@/components/CustomPreJoin';
 import {toast} from "sonner";
 import {Spinner} from "@/components/kibo-ui/spinner";
