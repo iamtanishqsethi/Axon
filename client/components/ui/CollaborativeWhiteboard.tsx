@@ -192,7 +192,7 @@ export default function CollaborativeWhiteboard({ roomId, userName }: Collaborat
     <div className="flex flex-col w-full h-full bg-background overflow-hidden">
       {/* ── Toolbar ──────────────────────────────────────────────────── */}
       <div className="relative z-20 flex items-center justify-between gap-2 px-3 py-2 bg-muted/20 border-b border-border/50 backdrop-blur-xl">
-        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 font-(family-name:--font-share-tech)">
+        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60">
           Whiteboard
         </span>
         <div className="flex items-center gap-2">

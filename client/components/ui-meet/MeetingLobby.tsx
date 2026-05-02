@@ -180,7 +180,7 @@ export default function MeetingLobby({meetingId}: MeetingLobbyProps) {
                                 </AnimatedShinyText>
                             </div>
                         </motion.div>
-                        <h1 className="text-2xl sm:text-3xl lg:text-5xl font-extrabold tracking-tight font-(family-name:--font-share-tech) uppercase text-foreground/90">
+                        <h1 className="text-2xl sm:text-3xl lg:text-5xl font-extrabold tracking-tight uppercase text-foreground/90">
                             Set up your space
                         </h1>
                     </div>

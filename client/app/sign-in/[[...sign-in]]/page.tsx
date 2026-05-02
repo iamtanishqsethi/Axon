@@ -1,7 +1,7 @@
 'use client'
 
 import {SignIn} from "@clerk/nextjs";
-import { FlickeringGrid } from "@/components/ui/flickering-grid";
+import { Particles } from "@/components/ui/particles";
 import {motion} from "framer-motion";
 
 const fadeUp = {
@@ -13,12 +13,12 @@ export default function Page() {
     return (
         <div className="relative min-h-screen overflow-hidden bg-background">
             <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-                <FlickeringGrid
-                    className="absolute inset-0 z-0 h-full w-full [mask-image:radial-gradient(ellipse_at_center,white_30%,transparent_80%)]"
-                    squareSize={4}
-                    gridGap={6}
-                    maxOpacity={0.4}
-                    flickerChance={0.1}
+                <Particles
+                    className="absolute inset-0 z-0 h-full w-full"
+                    quantity={100}
+                    ease={80}
+                    color={"#ffffff"}
+                    refresh
                 />
             </div>
 

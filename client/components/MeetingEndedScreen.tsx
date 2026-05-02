@@ -6,7 +6,7 @@ import {useRouter} from "next/navigation";
 import {Home, PhoneOff} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import GlassSurface from "@/components/GlassSurface";
-import { FlickeringGrid } from "@/components/ui/flickering-grid";
+import { Particles } from "@/components/ui/particles";
 import {motion} from "framer-motion";
 import {AnimatedCircularProgressBar} from "@/components/ui/animated-circular-progress-bar";
 
@@ -55,12 +55,12 @@ export default function MeetingEndedScreen({
     return (
         <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-20">
             <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-                <FlickeringGrid
-                    className="absolute inset-0 z-0 h-full w-full [mask-image:radial-gradient(ellipse_at_center,white_30%,transparent_80%)]"
-                    squareSize={4}
-                    gridGap={6}
-                    maxOpacity={0.4}
-                    flickerChance={0.1}
+                <Particles
+                    className="absolute inset-0 z-0 h-full w-full"
+                    quantity={100}
+                    ease={80}
+                    color={"#ffffff"}
+                    refresh
                 />
             </div>
             
@@ -84,7 +84,7 @@ export default function MeetingEndedScreen({
                     </GlassSurface>
                     
                     <div className="flex flex-col gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight font-(family-name:--font-share-tech) uppercase text-foreground">
+                        <h1 className="text-3xl font-bold tracking-tight uppercase text-foreground">
                             Meeting ended
                         </h1>
                         <p className="text-sm text-muted-foreground">

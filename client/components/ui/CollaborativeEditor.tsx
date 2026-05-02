@@ -254,7 +254,7 @@ export default function CollaborativeEditor({ roomId, userName }: CollaborativeE
       {/* ── Toolbar — z-20 to sit above Monaco's stacking context ──── */}
       <div className="relative z-20 flex items-center justify-between gap-2 px-3 py-2 bg-white/[0.03] border-b border-white/10 backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/50 font-(family-name:--font-share-tech) hidden sm:inline">
+          <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/50 hidden sm:inline">
             Editor
           </span>
 

@@ -8,6 +8,8 @@ import AnimatedContent from "./AnimatedContent";
 import { LampContainer } from "./ui/lamp";
 import { AnimatedShinyText } from "./ui/animated-shiny-text";
 import { LayersIcon } from "lucide-react";
+import { MagicCard } from "./ui/magic-card";
+import { useTheme } from "next-themes";
 
 const steps = [
   {
@@ -31,18 +33,19 @@ const steps = [
 ];
 
 export function StepsSection() {
-  return (
+  const theme = useTheme();
+    return (
     <section className="relative w-full pt-4" >
       <LampContainer className="">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ">
           <div className="text-center pt-58 mt-12 mb-24 flex flex-col items-center justify-center ">
             
-            <AnimatedContent distance={40} delay={0.2}>
+            <AnimatedContent distance={40} delay={0.1} threshold={0}>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground uppercase ">
                 Get started in <span className="text-primary">3 simple steps</span>
               </h2>
             </AnimatedContent>
-            <AnimatedContent distance={40} delay={0.3}>
+            <AnimatedContent distance={40} delay={0.2} threshold={0}>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
                 Experience the next level of developer collaboration with Axon's streamlined workflow.
               </p>
@@ -54,9 +57,14 @@ export function StepsSection() {
               <AnimatedContent
                 key={step.title}
                 distance={60}
-                delay={0.3 + index * 0.15}
-                className="h-full"
+                delay={0.1 + index * 0.1}
+                threshold={0}
+                className="h-full "
               >
+                <MagicCard
+        gradientColor={theme === "dark" ? "#262626" : "#D9D9D955"}
+        className="p-0 rounded-[2rem] "
+      >
                 <div
                   className={cn(
                     "group relative flex flex-col h-full items-start p-8 rounded-[2rem] border bg-zinc-950/40 border-zinc-800/50 backdrop-blur-md hover:border-primary/40 transition-all duration-500",
@@ -82,6 +90,7 @@ export function StepsSection() {
                   {/* Decorative gradient corner */}
                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[50px] rounded-full -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                 </div>
+                </MagicCard>
               </AnimatedContent>
             ))}
           </div>

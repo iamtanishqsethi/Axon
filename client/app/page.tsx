@@ -13,21 +13,21 @@ import CardSwap, { Card } from "@/components/CardSwap";
 import { MonitorPlay, PenTool, Code2 } from "lucide-react";
 import { WordRotate } from "@/components/ui/word-rotate";
 import SplitButton from "@/components/ui/split-button";
-import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiWebrtc, SiSocketdotio, SiFramer, SiClerk, SiShadcnui } from 'react-icons/si';
+import {  SiNextdotjs, SiTypescript,  SiWebrtc, SiSocketdotio, SiFramer, SiClerk, SiShadcnui } from 'react-icons/si';
 import LogoLoop from '@/components/LogoLoop';
 import { Skiper16 } from "@/components/ui/skiper-ui/skiper16";
 import { StepsSection } from "@/components/StepsSection";
+import { Safari } from "@/components/ui/safari";
+import { Footer } from "@/components/Footer";
+import { Backlight } from "@/components/ui/backlight";
 
 const techLogos = [
     { node: <SiNextdotjs />, title: "Next.js", href: "https://nextjs.org" },
-    { node: <SiReact />, title: "React", href: "https://react.dev" },
     { node: <SiTypescript />, title: "TypeScript", href: "https://www.typescriptlang.org" },
-    { node: <SiTailwindcss />, title: "Tailwind CSS", href: "https://tailwindcss.com" },
     { node: <SiWebrtc />, title: "WebRTC", href: "https://webrtc.org" },
     { node: <SiSocketdotio />, title: "Socket.io", href: "https://socket.io" },
     { node: <SiFramer />, title: "Framer Motion", href: "https://www.framer.com/motion/" },
     { node: <SiClerk />, title: "Clerk", href: "https://clerk.com" },
-    { node: <SiShadcnui />, title: "shadcn/ui", href: "https://ui.shadcn.com" },
 ];
 
 const TextHoverEffect = dynamic(
@@ -67,8 +67,8 @@ export default function Home() {
                         initialOpacity={0}
                         animateOpacity
                         scale={1}
-                        threshold={0.1}
-                        delay={0.2}
+                        threshold={0}
+                        delay={0.1}
                     >
                         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-4 flex flex-col items-center justify-center gap-2 text-center max-w-5xl uppercase">
                             <span>Video collaboration for</span>
@@ -85,8 +85,8 @@ export default function Home() {
                         initialOpacity={0}
                         animateOpacity
                         scale={1}
-                        threshold={0.1}
-                        delay={0.4}
+                        threshold={0}
+                        delay={0.2}
                     >
                         <p className="text-base sm:text-lg md:text-xl font-medium text-gray-400 max-w-[550px] mb-8 text-center leading-relaxed">
                             Seamless video meetings with ultra-low latency and real-time collaboration.
@@ -102,8 +102,8 @@ export default function Home() {
                         initialOpacity={0}
                         animateOpacity
                         scale={1}
-                        threshold={0.1}
-                        delay={0.6}
+                        threshold={0}
+                        delay={0.3}
                     >
                         <div className="pointer-events-auto">
                             <SplitButton
@@ -117,6 +117,14 @@ export default function Home() {
                     </AnimatedContent>
                 </div>
             </section>
+
+            <div className="flex items-center justify-center px-54 -mt-28 ">
+                <Backlight className="w-full" blur={40}  >
+                    <Safari url="axon.iamtanishqsethi.com" 
+                    imageSrc="/image.png"/>
+                </Backlight>
+                
+            </div>
 
 
 
@@ -132,8 +140,8 @@ export default function Home() {
                     initialOpacity={0}
                     animateOpacity
                     scale={1}
-                    threshold={0.1}
-                    delay={0.2}
+                    threshold={0}
+                    delay={0.1}
                 >
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col items-center">
                         <p className="text-sm font-medium text-muted-foreground mb-8 text-center uppercase tracking-widest">
@@ -166,8 +174,8 @@ export default function Home() {
                     initialOpacity={0}
                     animateOpacity
                     scale={1}
-                    threshold={0.1}
-                    delay={0.2}
+                    threshold={0}
+                    delay={0.1}
                 >
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center pt-24 mb-12">
                         <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground uppercase">
@@ -187,33 +195,7 @@ export default function Home() {
             <StepsSection />
 
             {/* Footer */}
-            <footer className="relative border-t bg-background/50 backdrop-blur-sm pt-12 pb-8 px-4 sm:px-6">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-                <div className="mx-auto max-w-7xl">
-                    <div className="flex flex-col items-center justify-center space-y-6 text-center">
-                        <div className="h-40 w-full max-w-2xl mx-auto">
-                            <TextHoverEffect text="Axon" className="w-full h-full" />
-                        </div>
-
-                        <div className="flex flex-col items-center space-y-2">
-                            <p className="text-sm text-muted-foreground">
-                                © {new Date().getFullYear()} Axon. Built with Next.js and LiveKit.
-                            </p>
-                            <p className="text-sm font-medium text-muted-foreground">
-                                Made by{" "}
-                                <a
-                                    href="https://iamtanishqsethi.com"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-foreground hover:text-primary transition-all underline-offset-4 hover:underline decoration-primary/50 font-bold"
-                                >
-                                    Tanishq Sethi
-                                </a>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </footer>
+            <Footer />
         </div>
     );
 }

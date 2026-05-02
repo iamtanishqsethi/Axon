@@ -5,7 +5,7 @@ import {useState} from 'react';
 import {useMeetingStore} from '@/store/meetingStore';
 import {ArrowLeft, LogIn, Sparkles, Video} from 'lucide-react';
 import {motion} from 'framer-motion';
-import { FlickeringGrid } from "@/components/ui/flickering-grid";
+import { Particles } from "@/components/ui/particles";
 import GlassSurface from "@/components/GlassSurface";
 import {AnimatedShinyText} from "@/components/ui/animated-shiny-text";
 import {cn} from "@/lib/utils";
@@ -58,12 +58,12 @@ export default function JoinMeetingPage() {
     return (
         <div className="relative min-h-screen overflow-hidden bg-background">
             <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-                <FlickeringGrid
-                    className="absolute inset-0 z-0 h-full w-full [mask-image:radial-gradient(ellipse_at_center,white_30%,transparent_80%)]"
-                    squareSize={4}
-                    gridGap={6}
-                    maxOpacity={0.4}
-                    flickerChance={0.1}
+                <Particles
+                    className="absolute inset-0 z-0 h-full w-full"
+                    quantity={100}
+                    ease={80}
+                    color={"#ffffff"}
+                    refresh
                 />
             </div>
 
@@ -76,7 +76,7 @@ export default function JoinMeetingPage() {
                     >
                         <Spinner variant={'bars'} size={40} />
                         <div className="text-center">
-                            <h2 className="text-2xl font-bold tracking-wide font-(family-name:--font-share-tech) uppercase">Connecting</h2>
+                            <h2 className="text-2xl font-bold tracking-wide uppercase">Connecting</h2>
                             <p className="text-muted-foreground mt-2 text-sm">Joining your secure room...</p>
                         </div>
                     </motion.div>
@@ -103,7 +103,7 @@ export default function JoinMeetingPage() {
                                     </motion.div>
 
                                     <div className="flex flex-col gap-3 lg:gap-4">
-                                        <h1 className="text-balance text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight font-(family-name:--font-share-tech) uppercase">
+                                        <h1 className="text-balance text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight uppercase">
                                             Enter the room code
                                         </h1>
                                         <p className="hidden md:block max-w-xl text-base leading-relaxed text-muted-foreground lg:text-lg">

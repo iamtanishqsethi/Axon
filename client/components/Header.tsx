@@ -65,7 +65,7 @@ export default function Header() {
                         </div>
 
                         <div className="flex items-center gap-3 relative z-50">
-                            <AnimatedThemeToggler />
+                        
                             <Show when="signed-out">
                                 <SignInButton>
                                     <Button variant="ghost" size="sm" className="cursor-pointer text-sm font-medium rounded-full py-1.5">

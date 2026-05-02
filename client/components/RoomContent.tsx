@@ -270,7 +270,7 @@ export function RoomContent({
                 >
                     <Spinner variant={'bars'} size={40} />
                     <div className="text-center">
-                        <h2 className="text-2xl font-bold tracking-wide font-(family-name:--font-share-tech) uppercase text-foreground/90">
+                        <h2 className="text-2xl font-bold tracking-wide uppercase text-foreground/90">
                             {room.state === "connecting" ? "Entering Room" : "Reconnecting"}
                         </h2>
                         <p className="text-muted-foreground mt-2 text-sm">

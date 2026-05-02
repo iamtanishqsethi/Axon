@@ -21,28 +21,18 @@ export interface CardProject {
 const defaultProjects: CardProject[] = [
   {
     title: "HD Video Calling",
-    src: "/images/features/hd-video.png",
+    src: "/images/features/video call.png",
     description: "High-fidelity video and audio for seamless collaboration.",
   },
   {
     title: "Collaborative Whiteboard",
-    src: "/images/features/whiteboard.png",
+    src: "/images/features/excaliDraw.png",
     description: "Brainstorm and visualize ideas together in real-time.",
   },
   {
     title: "Pair Programming",
-    src: "/images/features/code-editor.png",
+    src: "/images/features/judgeO.png",
     description: "Real-time collaborative code editor for technical teams.",
-  },
-  {
-    title: "Team Alignment",
-    src: "/images/features/hd-video.png",
-    description: "Keep your team synchronized with focused rooms.",
-  },
-  {
-    title: "Shared Context",
-    src: "/images/features/whiteboard.png",
-    description: "Maintain project state and context across meetings.",
   },
 ];
 
@@ -81,16 +71,16 @@ const StickyCard_001 = ({
         cardClassName
       )}
     >
-      <div className="relative h-full w-full">
+      <div className="relative h-full w-full bg-zinc-950/80 p-8 md:p-12">
         <Image
           src={src}
           alt={title}
           fill
-          className="object-cover"
+          className="object-contain p-8 md:p-12 pb-32"
           sizes="(max-width: 768px) 90vw, (max-width: 1200px) 80vw, 800px"
           priority={i === 0}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
         <div className="absolute bottom-0 left-0 p-8 text-white">
           <h3 className="text-2xl md:text-3xl font-bold">{title}</h3>
           {description && (

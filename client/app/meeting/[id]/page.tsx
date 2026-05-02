@@ -27,7 +27,7 @@ export default function MeetingPage({params}: { params: Promise<{ id: string }> 
                     >
                         <Spinner variant={'bars'} size={40} />
                         <div className="text-center">
-                            <h2 className="text-2xl font-bold tracking-wide font-(family-name:--font-share-tech) uppercase">Connecting</h2>
+                            <h2 className="text-2xl font-bold tracking-wide uppercase">Connecting</h2>
                             <p className="text-muted-foreground mt-2 text-sm">Joining your secure session...</p>
                         </div>
                     </motion.div>
