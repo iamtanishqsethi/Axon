@@ -34,7 +34,7 @@ export default function SettingsDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-[480px] overflow-hidden border border-border/50 bg-background/80 p-7 shadow-2xl backdrop-blur-3xl sm:rounded-[32px] dark:bg-zinc-950/70 dark:border-white/[0.08]">
+            <DialogContent className="max-w-[480px] max-h-[85vh] overflow-y-auto overflow-x-hidden border border-border/50 bg-background/80 p-7 shadow-2xl backdrop-blur-3xl sm:rounded-[32px] dark:bg-zinc-950/70 dark:border-white/[0.08] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-border/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-border/80">
                 <DialogHeader className="mb-4">
                     <DialogTitle className="flex flex-row items-center gap-3 text-2xl font-semibold tracking-tight text-foreground">
                         <div className="flex size-10 items-center justify-center rounded-2xl bg-muted border border-border shadow-inner dark:bg-white/[0.05] dark:border-white/5">
