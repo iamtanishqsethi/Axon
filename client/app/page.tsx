@@ -118,7 +118,7 @@ export default function Home() {
                 </div>
             </section>
 
-            <div className="flex items-center justify-center px-54 -mt-28 ">
+            <div className="flex items-center justify-center px-4 sm:px-12 md:px-24 lg:px-48 -mt-10 sm:-mt-28 ">
                 <Backlight className="w-full" blur={40}  >
                     <Safari url="axon.iamtanishqsethi.com" 
                     imageSrc="/image.png"/>

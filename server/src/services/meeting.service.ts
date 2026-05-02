@@ -220,16 +220,33 @@ export async function leaveMeeting(meetingId:string,userId:string){
             return {meetingEnded: true};
         }
 
-        await tx.participant.update({
-            where:{
-                meetingId_userId:{
+        const participant = await tx.participant.findUnique({
+            where: {
+                meetingId_userId: {
                     meetingId,
                     userId
                 }
+            }
+        });
+
+        if (!participant) return {meetingEnded: false};
+
+        if (participant.status === "WAITING") {
+            await tx.participant.delete({
+                where: { id: participant.id }
+            });
+            return {meetingEnded: false};
+        }
+
+        const isApproved = participant.status === "APPROVED";
+
+        await tx.participant.update({
+            where:{
+                id: participant.id
             },
             data:{
-                status:"LEFT",
-                leftAt:new Date()
+                status: isApproved ? "LEFT" : participant.status,
+                leftAt: new Date()
             }
         });
 

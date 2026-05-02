@@ -19,8 +19,8 @@ export function Footer({ className }: { className?: string }) {
           {/* Brand Column */}
           <div className="lg:col-span-2 flex flex-col space-y-6">
             <Link href="/" className="flex items-center gap-2">
-              <div className="bg-foreground text-background p-1.5 rounded-md">
-                <Hexagon size={24} fill="currentColor" />
+              <div className=" rounded-md">
+                <img src="./icon.png" alt="Axon Logo" className="h-6 w-auto object-center" />
               </div>
               <span className="font-bold text-xl tracking-tight">Axon</span>
             </Link>
