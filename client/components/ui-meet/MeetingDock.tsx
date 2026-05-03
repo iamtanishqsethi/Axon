@@ -25,6 +25,7 @@ import {Badge} from "@/components/ui/badge";
 import {cn} from "@/lib/utils";
 import {Spinner} from "@/components/kibo-ui/spinner";
 import GlassSurface from "@/components/GlassSurface";
+import LeaveDialog from "@/components/ui-meet/LeaveDialog";
 
 interface MeetingDockProps {
     onLeave: () => void;
@@ -62,6 +63,7 @@ export default function MeetingDock({
     } = useLocalParticipant();
     const [pendingAction, setPendingAction] = useState<PendingAction>(null);
     const [moreOpen, setMoreOpen] = useState(false);
+    const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
     const runMediaAction = async (action: PendingAction, fn: () => Promise<unknown>) => {
         if (pendingAction) return;
@@ -85,6 +87,8 @@ export default function MeetingDock({
         setPendingAction("end");
         onEndMeeting();
     };
+
+    const openLeaveDialog = () => setLeaveDialogOpen(true);
 
     const reactionItems = ["👍", "👏", "🔥", "❤️", "😂", "🎉"];
 
@@ -204,7 +208,7 @@ export default function MeetingDock({
         {
             title: "Leave",
             icon: pendingAction === "leave" ? <Spinner variant={'bars'} /> : <PhoneOff />,
-            onClick: leave,
+            onClick: openLeaveDialog,
             className: "!bg-red-500 !text-white shadow-[0_8px_24px_rgba(239,68,68,0.4)] hover:bg-red-500/90 !border-none",
         },
     ];
@@ -213,7 +217,7 @@ export default function MeetingDock({
         items.push({
             title: "End Meeting",
             icon: pendingAction === "end" ? <Spinner variant={'bars'} /> : <LogOut />,
-            onClick: endMeeting,
+            onClick: openLeaveDialog,
             className: "!bg-red-600 !text-white shadow-[0_8px_24px_rgba(220,38,38,0.4)] hover:bg-red-600/90 !border-none",
         });
     }
@@ -281,12 +285,13 @@ export default function MeetingDock({
         mobileSecondaryItems.push({
             label: "End Meeting",
             icon: pendingAction === "end" ? <Spinner variant={'bars'} className="size-4" /> : <LogOut className="size-4" />,
-            onClick: () => { endMeeting(); setMoreOpen(false); },
+            onClick: () => { openLeaveDialog(); setMoreOpen(false); },
             className: "text-red-400",
         });
     }
 
     return (
+        <>
         <div className="flex items-center justify-center max-w-full">
             {/* ── Desktop: full floating dock ── */}
             <div className="hidden md:block">
@@ -416,7 +421,7 @@ export default function MeetingDock({
 
                         {/* Leave */}
                         <button
-                            onClick={leave}
+                            onClick={openLeaveDialog}
                             className="flex size-11 items-center justify-center rounded-full bg-red-500 text-white shadow-[0_8px_24px_rgba(239,68,68,0.4)] transition-colors hover:bg-red-500/90"
                         >
                             <div className="flex size-5 items-center justify-center">
@@ -427,5 +432,14 @@ export default function MeetingDock({
                 </GlassSurface>
             </div>
         </div>
+
+        <LeaveDialog
+            open={leaveDialogOpen}
+            onOpenChange={setLeaveDialogOpen}
+            onLeave={leave}
+            onEndMeeting={endMeeting}
+            isHost={isHost}
+        />
+        </>
     );
 }

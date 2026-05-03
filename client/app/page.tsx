@@ -4,6 +4,7 @@ import {useRouter} from "next/navigation";
 import dynamic from "next/dynamic";
 import {motion} from "framer-motion";
 import AnimatedContent from "@/components/AnimatedContent";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 const Spline = dynamic(() => import('@splinetool/react-spline'), {
   ssr: false,
@@ -44,17 +45,24 @@ export default function Home() {
     return (
         <div className="relative min-h-screen overflow-x-clip bg-background" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
 
+            <LoadingScreen />
+
             {/* Hero */}
             <section 
                 className="relative flex min-h-screen flex-col items-center justify-center px-4 text-center sm:px-6 overflow-hidden bg-background text-foreground"
                 style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}
             >
                 {/* Spline Background */}
-                <div className="absolute top-0 left-1/2 w-full h-[100vh] -translate-x-[54%] md:-translate-x-[53%] -translate-y-[10%] md:-translate-y-[15%] scale-[1.75] md:scale-[2.2] z-0 [&_a]:!hidden pointer-events-none">
+                <motion.div
+                    className="absolute top-0 left-1/2 w-full h-[100vh] -translate-x-[54%] md:-translate-x-[53%] -translate-y-[10%] md:-translate-y-[15%] scale-[1.75] md:scale-[2.2] z-0 [&_a]:!hidden pointer-events-none"
+                    initial={{ y: -160, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+                >
                     <Spline
                         scene="https://prod.spline.design/voV9nDlB8COK0k2W/scene.splinecode" 
                     />
-                </div>
+                </motion.div>
 
                 {/* Hero Content Overlay */}
                 <div className="relative z-10 flex flex-col items-center justify-center mt-12 sm:mt-24 pointer-events-none">
