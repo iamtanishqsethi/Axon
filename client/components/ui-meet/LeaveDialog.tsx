@@ -25,13 +25,13 @@ const modalVariants = {
         opacity: 1,
         scale: 1,
         y: 0,
-        transition: { type: "spring", damping: 26, stiffness: 360, mass: 0.9 },
+        transition: { type: "spring" as const, damping: 26, stiffness: 360, mass: 0.9 },
     },
     exit: {
         opacity: 0,
         scale: 0.9,
         y: 16,
-        transition: { duration: 0.2, ease: [0.4, 0, 1, 1] },
+        transition: { duration: 0.2, ease: [0.4, 0, 1, 1] as const },
     },
 };
 
@@ -47,7 +47,7 @@ const itemVariants = {
     visible: {
         opacity: 1,
         y: 0,
-        transition: { type: "spring", damping: 22, stiffness: 300 },
+        transition: { type: "spring" as const, damping: 22, stiffness: 300 },
     },
 };
 
@@ -63,7 +63,7 @@ const iconRingVariants = {
         transition: {
             duration: 2,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: "easeInOut" as const,
         },
     },
 };
@@ -170,7 +170,7 @@ export default function LeaveDialog({
                                 >
                                     {/* Leave (always shown) */}
                                     <motion.button
-                                        whileHover={{ scale: 1.02, brightness: 1.1 }}
+                                        whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.97 }}
                                         transition={{ type: "spring", stiffness: 400, damping: 20 }}
                                         onClick={() => { onLeave(); close(); }}
