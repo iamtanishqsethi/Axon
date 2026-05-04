@@ -10,7 +10,6 @@ interface Track {
   title: string;
   artist: string;
   src: string;
-  image: string;
 }
 
 const ElevatorTracks: Track[] = [
@@ -18,22 +17,19 @@ const ElevatorTracks: Track[] = [
     id: 1,
     title: "Bossa Nova Background",
     artist: "music_for_video",
-    src: "/music_for_video-elevator-music-bossa-nova-background-music-version-60s-10900.mp3",
-    image: "https://cdn.pixabay.com/photo/2022/07/15/15/34/vinyl-record-7323561_1280.jpg"
+    src: "/music_for_video-elevator-music-bossa-nova-background-music-version-60s-10900.mp3"
   },
   {
     id: 2,
     title: "Lounge Jazz Vibe",
     artist: "STAROSTIN",
-    src: "/starostin-lounge-jazz-elevator-music-489965.mp3",
-    image: "https://cdn.pixabay.com/photo/2015/10/05/14/40/trumpet-972605_1280.jpg"
+    src: "/starostin-lounge-jazz-elevator-music-489965.mp3"
   },
   {
     id: 3,
     title: "Elevator Jazz Lounge",
     artist: "ikoliks_aj",
-    src: "/ikoliks_aj-jazz-lounge-elevator-music-332339.mp3",
-    image: "https://cdn.pixabay.com/photo/2016/11/29/03/42/bench-1867140_1280.jpg"
+    src: "/ikoliks_aj-jazz-lounge-elevator-music-332339.mp3"
   }
 ];
 
@@ -133,16 +129,16 @@ export const RecordPlayer: React.FC<RecordPlayerProps> = ({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.3 }}
-                className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-[#111] overflow-hidden z-10"
+                className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-[#111] overflow-hidden z-10 flex items-center justify-center"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-900 via-orange-900 to-rose-900" />
-                <img src={currentTrack.image} alt={currentTrack.title} className="absolute inset-0 w-full h-full object-cover opacity-60" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-[#111] rounded-full shadow-inner border border-white/10" />
+                <div className="absolute inset-0 bg-[#111]" />
+                <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-[#000] rounded-full shadow-inner border border-white/10 z-20" />
+                <div className="absolute inset-0 rounded-full border border-white/5 z-20 pointer-events-none" />
               </motion.div>
             ) : (
-              <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-[#111] overflow-hidden bg-gradient-to-br from-zinc-700 to-zinc-900 z-10">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-zinc-600 rounded-full shadow-inner border border-white/10" />
+              <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-[#111] overflow-hidden bg-gradient-to-br from-zinc-800 to-zinc-900 z-10 flex items-center justify-center">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-[#000] rounded-full shadow-inner border border-white/10" />
               </div>
             )}
           </AnimatePresence>

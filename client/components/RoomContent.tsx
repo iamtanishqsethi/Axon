@@ -25,6 +25,7 @@ import {motion} from "framer-motion";
 import dynamic from "next/dynamic";
 import CollaborativeWhiteboard from "@/components/ui/CollaborativeWhiteboard";
 import {toast} from "sonner";
+import {Mic} from "lucide-react";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 
 const CollaborativeEditor = dynamic(
@@ -236,6 +237,50 @@ export function RoomContent({
             socket.off("new-waiting-user", handleNewWaitingUser);
         };
     }, [isHost, meetingId, setWaitingRoomCount]);
+
+    // Host-initiated remove / mute / unmute-request
+    useEffect(() => {
+        const handleYouWereRemoved = () => {
+            toast.error("You have been removed from the meeting by the host.");
+            void handleLeave();
+        };
+
+        const handleYouWereMuted = async () => {
+            try {
+                await room.localParticipant.setMicrophoneEnabled(false);
+                toast.warning("Your microphone was muted by the host.");
+            } catch (e) {
+                console.error("Failed to mute local mic:", e);
+            }
+        };
+
+        const handleUnmuteRequested = () => {
+            toast("Host requested you to unmute", {
+                icon: <Mic className="size-5 text-emerald-500" />,
+                duration: 10000,
+                action: {
+                    label: "Unmute",
+                    onClick: () => {
+                        void room.localParticipant.setMicrophoneEnabled(true);
+                    },
+                },
+                cancel: {
+                    label: "Dismiss",
+                    onClick: () => {},
+                },
+            });
+        };
+
+        socket.on("you-were-removed", handleYouWereRemoved);
+        socket.on("you-were-muted", handleYouWereMuted);
+        socket.on("unmute-requested", handleUnmuteRequested);
+
+        return () => {
+            socket.off("you-were-removed", handleYouWereRemoved);
+            socket.off("you-were-muted", handleYouWereMuted);
+            socket.off("unmute-requested", handleUnmuteRequested);
+        };
+    }, [handleLeave, room]);
 
     const togglePin = (trackId: string) => {
         setPinnedTrackId(current => current === trackId ? null : trackId);

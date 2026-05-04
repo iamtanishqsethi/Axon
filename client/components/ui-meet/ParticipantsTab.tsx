@@ -7,13 +7,21 @@ import {Input} from "@/components/ui/input";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {Badge} from "@/components/ui/badge";
 import {ScrollArea} from "@/components/ui/scroll-area";
-import {Check, Crown, Hand, Mic, MicOff, Search, Video, VideoOff, X} from "lucide-react";
+import {Check, Crown, Hand, Mic, MicOff, MoreHorizontal, Search, UserMinus, Video, VideoOff, X} from "lucide-react";
 import {useCallback, useEffect, useMemo, useState} from "react";
+import {motion, AnimatePresence} from "framer-motion";
 import {socket} from "@/lib/socket";
 import {approveParticipant, getWaitingRoom, rejectParticipant} from "@/services/api";
 import {toast} from "sonner";
 import {cn} from "@/lib/utils";
 import GlassSurface from "@/components/GlassSurface";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ParticipantsTabProps {
     meetingId: string;
@@ -95,6 +103,21 @@ export default function ParticipantsTab({meetingId}: ParticipantsTabProps) {
             console.error(error);
             toast.error("Failed to reject participant");
         }
+    };
+
+    const handleRemoveParticipant = (identity: string) => {
+        socket.emit("remove-participant", {meetingId, targetIdentity: identity});
+        toast.success("Participant removed");
+    };
+
+    const handleMuteParticipant = (identity: string) => {
+        socket.emit("mute-participant", {meetingId, targetIdentity: identity});
+        toast.success("Participant muted");
+    };
+
+    const handleRequestUnmute = (identity: string, name: string) => {
+        socket.emit("request-unmute", {meetingId, targetIdentity: identity});
+        toast.success(`Unmute request sent to ${name}`);
     };
 
     const filteredParticipants = useMemo(() => {
@@ -267,19 +290,95 @@ export default function ParticipantsTab({meetingId}: ParticipantsTabProps) {
                                             </div>
                                         </div>
 
-                                        <div className="flex shrink-0 items-center gap-2 text-muted-foreground/40 dark:text-white/40">
-                                            <div className={cn("p-1.5 rounded-full transition-colors", !isMicOn ? "bg-red-500/10 text-red-500" : "bg-muted text-muted-foreground/40 dark:bg-white/5 dark:text-white/40")}>
-                                                {isMicOn
-                                                    ? <Mic size={14} aria-label="Microphone on" />
-                                                    : <MicOff size={14} className="text-red-400" aria-label="Muted" />
-                                                }
+                                        <div className="flex shrink-0 items-center gap-2">
+                                            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-white/5">
+                                                <div className={cn("transition-colors", !isMicOn ? "text-red-500" : "text-muted-foreground/40 dark:text-white/40")}>
+                                                    {isMicOn
+                                                        ? <Mic size={14} aria-label="Microphone on" />
+                                                        : <MicOff size={14} aria-label="Muted" />
+                                                    }
+                                                </div>
+                                                <div className={cn("transition-colors", !isCamOn ? "text-red-500" : "text-muted-foreground/40 dark:text-white/40")}>
+                                                    {isCamOn
+                                                        ? <Video size={14} aria-label="Camera on" />
+                                                        : <VideoOff size={14} aria-label="Camera off" />
+                                                    }
+                                                </div>
                                             </div>
-                                            <div className={cn("p-1.5 rounded-full transition-colors", !isCamOn ? "bg-red-500/10 text-red-500" : "bg-muted text-muted-foreground/40 dark:bg-white/5 dark:text-white/40")}>
-                                                {isCamOn
-                                                    ? <Video size={14} aria-label="Camera on" />
-                                                    : <VideoOff size={14} className="text-red-400" aria-label="Camera off" />
-                                                }
-                                            </div>
+
+                                            {isHost && !p.isLocal && (
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="size-8 rounded-full hover:bg-muted dark:hover:bg-white/10 transition-all active:scale-90"
+                                                        >
+                                                            <MoreHorizontal size={16} className="text-muted-foreground" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl glass-surface-heavy shadow-2xl border-white/10">
+                                                        <motion.div
+                                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                            transition={{
+                                                                type: "spring",
+                                                                stiffness: 300,
+                                                                damping: 20,
+                                                                staggerChildren: 0.05,
+                                                                delayChildren: 0.05
+                                                            }}
+                                                        >
+                                                            {isMicOn ? (
+                                                                <motion.div
+                                                                    initial={{ opacity: 0, x: -10 }}
+                                                                    animate={{ opacity: 1, x: 0 }}
+                                                                >
+                                                                    <DropdownMenuItem
+                                                                        onClick={() => handleMuteParticipant(p.identity)}
+                                                                        className="rounded-xl gap-3 py-3 cursor-pointer text-amber-500 focus:text-amber-500 focus:bg-amber-500/10 transition-colors"
+                                                                    >
+                                                                        <MicOff size={18} />
+                                                                        <span className="font-bold text-base">Mute Participant</span>
+                                                                    </DropdownMenuItem>
+                                                                </motion.div>
+                                                            ) : (
+                                                                <motion.div
+                                                                    initial={{ opacity: 0, x: -10 }}
+                                                                    animate={{ opacity: 1, x: 0 }}
+                                                                >
+                                                                    <DropdownMenuItem
+                                                                        onClick={() => handleRequestUnmute(p.identity, name)}
+                                                                        className="rounded-xl gap-3 py-3 cursor-pointer text-emerald-500 focus:text-emerald-500 focus:bg-emerald-500/10 transition-colors"
+                                                                    >
+                                                                        <Mic size={18} />
+                                                                        <span className="font-bold text-base">Request Unmute</span>
+                                                                    </DropdownMenuItem>
+                                                                </motion.div>
+                                                            )}
+                                                            <motion.div
+                                                                initial={{ opacity: 0 }}
+                                                                animate={{ opacity: 1 }}
+                                                            >
+                                                                <DropdownMenuSeparator className="bg-white/10 my-1.5" />
+                                                            </motion.div>
+                                                            <motion.div
+                                                                initial={{ opacity: 0, x: -10 }}
+                                                                animate={{ opacity: 1, x: 0 }}
+                                                            >
+                                                                <DropdownMenuItem
+                                                                    onClick={() => handleRemoveParticipant(p.identity)}
+                                                                    variant="destructive"
+                                                                    className="rounded-xl gap-3 py-3 cursor-pointer transition-colors"
+                                                                >
+                                                                    <UserMinus size={18} />
+                                                                    <span className="font-bold text-base">Remove</span>
+                                                                </DropdownMenuItem>
+                                                            </motion.div>
+                                                        </motion.div>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            )}
                                         </div>
                                     </div>
                                 );

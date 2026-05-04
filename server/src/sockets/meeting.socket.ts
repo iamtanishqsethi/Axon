@@ -109,6 +109,59 @@ export default function registerMeetingSocket(io:Server) {
             }
         })
 
+        socket.on('remove-participant', async ({ meetingId, targetIdentity }: { meetingId: string; targetIdentity: string }) => {
+            try {
+                const userId = socket.data.userId;
+                const meeting = await prisma.meeting.findUnique({ where: { id: meetingId } });
+                if (!meeting || meeting.hostId !== userId) {
+                    socket.emit('meeting:error', { message: 'Unauthorized' });
+                    return;
+                }
+
+                // Emit removal notice to the target user's personal room
+                io.to(`user:${targetIdentity}`).emit('you-were-removed', { meetingId });
+                console.log(`[meeting:${meetingId}] Host removed participant: ${targetIdentity}`);
+            } catch (e) {
+                socket.emit('meeting:error', { message: 'Error removing participant' });
+                console.error(e);
+            }
+        })
+
+        socket.on('mute-participant', async ({ meetingId, targetIdentity }: { meetingId: string; targetIdentity: string }) => {
+            try {
+                const userId = socket.data.userId;
+                const meeting = await prisma.meeting.findUnique({ where: { id: meetingId } });
+                if (!meeting || meeting.hostId !== userId) {
+                    socket.emit('meeting:error', { message: 'Unauthorized' });
+                    return;
+                }
+
+                io.to(`user:${targetIdentity}`).emit('you-were-muted', { meetingId });
+                console.log(`[meeting:${meetingId}] Host muted participant: ${targetIdentity}`);
+            } catch (e) {
+                socket.emit('meeting:error', { message: 'Error muting participant' });
+                console.error(e);
+            }
+        })
+
+        socket.on('request-unmute', async ({ meetingId, targetIdentity }: { meetingId: string; targetIdentity: string }) => {
+            try {
+                const userId = socket.data.userId;
+                const meeting = await prisma.meeting.findUnique({ where: { id: meetingId } });
+                if (!meeting || meeting.hostId !== userId) {
+                    socket.emit('meeting:error', { message: 'Unauthorized' });
+                    return;
+                }
+
+                // Can't force-unmute — send a polite request to the participant
+                io.to(`user:${targetIdentity}`).emit('unmute-requested', { meetingId });
+                console.log(`[meeting:${meetingId}] Host requested unmute from: ${targetIdentity}`);
+            } catch (e) {
+                socket.emit('meeting:error', { message: 'Error requesting unmute' });
+                console.error(e);
+            }
+        })
+
         socket.on('leave-meeting',({meetingId, meetingEnded, roomEmpty})=>{
             try{
                 const userId=socket.data.userId

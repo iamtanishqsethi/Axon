@@ -36,17 +36,6 @@ export default function CollaborativeWhiteboard({ roomId, userName }: Collaborat
   const { theme, resolvedTheme } = useTheme();
   const currentTheme = (resolvedTheme || theme || "dark") as "dark" | "light";
 
-  /**
-   * Accumulated map of element IDs → the last version+versionNonce we received
-   * from a remote Yjs update.  We NEVER clear this map — we only update entries.
-   *
-   * In onChange we skip any element whose id+version+nonce exactly matches the
-   * last remote entry, because that element came FROM Yjs and we must not echo
-   * it back.  As soon as the local user edits that element its versionNonce
-   * changes, so it will no longer match and will be pushed normally.
-   */
-  const remoteVersionsRef = useRef<Map<string, { version: number; versionNonce: number }>>(new Map());
-
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
@@ -74,18 +63,14 @@ export default function CollaborativeWhiteboard({ roomId, userName }: Collaborat
     const yElementsMap = ydoc.getMap<any>("elementsMap");
 
     // Remote Yjs → Excalidraw
-    const applyRemoteElements = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const applyRemoteElements = (event?: any) => {
+      // Skip updates triggered by our own local changes to avoid interrupting drawing
+      if (event && event.transaction && event.transaction.local) return;
+
       if (!excalidrawAPI) return;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const elements: any[] = Object.values(yElementsMap.toJSON());
-
-      // ACCUMULATE (not replace) the last-known remote version for each element.
-      elements.forEach((el) => {
-        remoteVersionsRef.current.set(el.id, {
-          version: el.version,
-          versionNonce: el.versionNonce,
-        });
-      });
 
       excalidrawAPI.updateScene({ elements, commitToHistory: false });
     };
@@ -131,33 +116,19 @@ export default function CollaborativeWhiteboard({ roomId, userName }: Collaborat
     if (!ydocRef.current) return;
 
     const yElementsMap = ydocRef.current.getMap("elementsMap");
-    const remoteVersions = remoteVersionsRef.current;
-
-    // Filter to only elements that differ from the last remote state we applied.
-    // This prevents echoing remote elements back to Yjs while still allowing
-    // local edits (which change the versionNonce even at the same version).
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const changed = elements.filter((el: any) => {
-      const remote = remoteVersions.get(el.id);
-      if (!remote) return true; // brand-new local element — always push
-      // If exact same version+nonce it's an unchanged remote element — skip
-      return !(remote.version === el.version && remote.versionNonce === el.versionNonce);
-    });
-
-    if (changed.length === 0) return;
 
     ydocRef.current.transact(() => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      changed.forEach((el: any) => {
+      elements.forEach((el: any) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const existing = yElementsMap.get(el.id) as any;
+        // Push if new, higher version, different nonce (mid-drag), or newly deleted
         if (
           !existing ||
           el.version > existing.version ||
-          (el.version === existing.version && el.versionNonce !== existing.versionNonce) ||
-          (el.isDeleted && !existing.isDeleted)
+          el.versionNonce !== existing.versionNonce
         ) {
-          yElementsMap.set(el.id, el);
+          yElementsMap.set(el.id, JSON.parse(JSON.stringify(el)));
         }
       });
     });
