@@ -19,7 +19,7 @@ export const InlineToast: FC<InlineCopyToastProps> = ({
   const [copied, setCopied] = useState<boolean>(false);
 
   const handleCopy = async (): Promise<void> => {
-    await navigator.clipboard.writeText(code);
+    await navigator.clipboard.writeText('https://axon.iamtanishqsethi.com/meeting/' + code);
     setCopied(true);
 
     setTimeout(() => {
