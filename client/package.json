@@ -21,6 +21,7 @@
     "@monaco-editor/react": "^4.7.0",
     "@splinetool/react-spline": "^4.1.0",
     "@tabler/icons-react": "^3.41.1",
+    "@vercel/analytics": "^2.0.1",
     "ai": "^6.0.168",
     "axios": "^1.13.6",
     "class-variance-authority": "^0.7.1",

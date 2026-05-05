@@ -10,6 +10,7 @@ import AxiosProvider from "@/components/AxiosProvider";
 import {Toaster} from "@/components/ui/sonner";
 import {TooltipProvider} from "@/components/ui/tooltip";
 import SmoothScroll from "@/components/SmoothScroll";
+import { Analytics } from "@vercel/analytics/next"
 
 
 const geistSans = Geist({
@@ -44,6 +45,7 @@ export default function RootLayout({
           <body
               className={`${geistSans.variable} ${geistMono.variable} ${shareTech.variable} antialiased`}
           >
+          <Analytics />
           <ClerkProvider
               appearance={{
                   theme: shadcn,
