@@ -25,7 +25,7 @@ import {motion} from "framer-motion";
 import dynamic from "next/dynamic";
 import CollaborativeWhiteboard from "@/components/ui/CollaborativeWhiteboard";
 import {toast} from "sonner";
-import {Mic} from "lucide-react";
+import {Mic, MessageCircle} from "lucide-react";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 
 const CollaborativeEditor = dynamic(
@@ -106,13 +106,19 @@ export function RoomContent({
 
     // Active speakers
     useEffect(() => {
+        let timeoutId: NodeJS.Timeout;
+
         const updateSpeakers = (speakers: Participant[]) => {
-            setActiveSpeakerIds(speakers.map(speaker => speaker.identity));
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                setActiveSpeakerIds(speakers.map(speaker => speaker.identity));
+            }, 800);
         };
 
         queueMicrotask(() => updateSpeakers(room.activeSpeakers));
         room.on(RoomEvent.ActiveSpeakersChanged, updateSpeakers);
         return () => {
+            clearTimeout(timeoutId);
             room.off(RoomEvent.ActiveSpeakersChanged, updateSpeakers);
         };
     }, [room]);
@@ -182,11 +188,23 @@ export function RoomContent({
     // Chat messages from socket
     useEffect(() => {
         const handleMessage = (message: ChatMessage) => {
-            if (message.userId === socket.id) return;
+            const currentUserId = room.localParticipant?.identity || socket.id;
+            if (message.userId === currentUserId || message.userId === socket.id) return;
             addMessage(message);
             playMeetingSound("message");
             if (activePanel !== "chat") {
                 setUnreadCount(count => count + 1);
+                toast.custom((t) => (
+                    <div className="flex items-center gap-3">
+                        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                            <MessageCircle size={16} />
+                        </div>
+                        <div className="flex flex-col overflow-hidden">
+                            <span className="text-sm font-semibold truncate">{message.userName || "Participant"}</span>
+                            <span className="text-xs text-muted-foreground truncate">{message.text}</span>
+                        </div>
+                    </div>
+                ));
             }
         };
 
@@ -195,7 +213,7 @@ export function RoomContent({
         return () => {
             socket.off("chat-message", handleMessage);
         };
-    }, [addMessage, activePanel]);
+    }, [addMessage, activePanel, room.localParticipant?.identity]);
 
     // Reactions from socket
     useEffect(() => {

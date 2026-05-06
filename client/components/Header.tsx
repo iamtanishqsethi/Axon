@@ -40,21 +40,23 @@ export default function Header() {
                     blur={12}
                     saturation={1.2}
                 >
-                    <div className="flex items-center justify-between w-full px-8 py-1.5 relative">
-                        <Link href="/" className="interactive-lift flex items-center gap-2.5 relative z-50">
-                            <div className="flex size-8 items-center justify-center rounded-xl overflow-hidden shadow-sm shadow-primary/20">
-                                <img src="/icon.png" alt="Axon Logo" className="size-full object-cover" />
-                            </div>
-                            <span className="text-lg font-bold tracking-tight uppercase">Axon</span>
-                        </Link>
+                    <div className="flex items-center w-full px-8 py-1.5 relative">
+                        <div className="flex flex-1 justify-start">
+                            <Link href="/" className="interactive-lift flex items-center gap-2.5 relative z-50">
+                                <div className="flex size-8 items-center justify-center rounded-xl overflow-hidden shadow-sm shadow-primary/20">
+                                    <img src="/icon.png" alt="Axon Logo" className="size-full object-cover" />
+                                </div>
+                                <span className="text-lg font-bold tracking-tight uppercase">Axon</span>
+                            </Link>
+                        </div>
 
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <div className="flex items-center gap-8 pointer-events-auto">
+                        <div className="flex items-center justify-center pointer-events-auto">
+                            <div className="flex items-center gap-8 px-4">
                                 {navItems.map((item) => (
                                     <Link
                                         key={item.name}
                                         href={item.link}
-                                        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                                        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
                                     >
                                         {item.name}
                                     </Link>
@@ -62,8 +64,7 @@ export default function Header() {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3 relative z-50">
-                        
+                        <div className="flex flex-1 justify-end items-center gap-3 relative z-50">
                             <Show when="signed-out">
                                 <SignInButton>
                                     <Button variant="ghost" size="sm" className="cursor-pointer text-sm font-medium rounded-full py-1.5">

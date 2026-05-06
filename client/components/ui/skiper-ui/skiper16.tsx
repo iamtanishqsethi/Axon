@@ -67,24 +67,24 @@ const StickyCard_001 = ({
       }}
       className={cn(
         "relative flex flex-col overflow-hidden rounded-[2rem] border bg-card shadow-2xl origin-top",
-        "h-[400px] w-[90%] max-w-[600px] md:h-[500px] md:w-[800px]",
+        "h-[320px] sm:h-[400px] w-[95%] md:h-[600px] md:w-[90%] lg:h-[700px] lg:w-[1000px] xl:w-[1200px]",
         cardClassName
       )}
     >
-      <div className="relative h-full w-full bg-zinc-950/80 p-8 md:p-12">
+      <div className="relative h-full w-full bg-zinc-950/80">
         <Image
           src={src}
           alt={title}
           fill
-          className="object-contain p-8 md:p-12 pb-32"
-          sizes="(max-width: 768px) 90vw, (max-width: 1200px) 80vw, 800px"
+          className="object-contain object-top md:object-center p-2 pt-4 md:p-6"
+          sizes="(max-width: 768px) 95vw, (max-width: 1200px) 90vw, 1200px"
           priority={i === 0}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-        <div className="absolute bottom-0 left-0 p-8 text-white">
-          <h3 className="text-2xl md:text-3xl font-bold">{title}</h3>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-full p-5 md:p-10 text-white">
+          <h3 className="text-2xl md:text-4xl font-bold">{title}</h3>
           {description && (
-            <p className="mt-2 text-sm md:text-base text-white/80 max-w-md">
+            <p className="mt-2 text-sm md:text-lg text-white/80 max-w-2xl">
               {description}
             </p>
           )}

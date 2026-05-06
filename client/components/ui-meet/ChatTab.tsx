@@ -33,10 +33,12 @@ export default function ChatTab({meetingId}: ChatTabProps) {
         const trimmed = text.trim();
         if (!trimmed) return;
 
+        const currentUserId = room.localParticipant?.identity || socket.id || "unknown";
+
         const msg: ChatMessage = {
-            id: `${socket.id ?? "local"}-${Date.now()}`,
+            id: `${currentUserId}-${Date.now()}`,
             text: trimmed,
-            userId: socket.id ?? "unknown",
+            userId: currentUserId,
             userName: room.localParticipant?.name || room.localParticipant?.identity || "You",
             timestamp: Date.now(),
         };
@@ -69,7 +71,7 @@ export default function ChatTab({meetingId}: ChatTabProps) {
                     )}
 
                     {messages.map((m, i) => {
-                        const isSelf = m.userId === socket.id;
+                        const isSelf = m.userId === room.localParticipant?.identity || m.userId === socket.id;
                         const sender = m.userName ?? (isSelf ? "You" : m.userId.slice(0, 8));
 
                         return (
